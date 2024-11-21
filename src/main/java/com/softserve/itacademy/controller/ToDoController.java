@@ -7,6 +7,7 @@ import com.softserve.itacademy.model.User;
 import com.softserve.itacademy.service.TaskService;
 import com.softserve.itacademy.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.h2.engine.Mode;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -26,43 +27,55 @@ public class ToDoController {
     private final TaskService taskService;
     private final UserService userService;
 
-    @GetMapping("/create/users/{owner_id}")
-    public String createToDoForm(/*add needed parameters*/) {
-        // TODO
-    }
+//    @GetMapping("/create/users/{owner_id}")
+//    public String createToDoForm(/*add needed parameters*/) {
+//        // TODO
+//        return "todo-create";
+//    }
 
-    @PostMapping("/create/users/{owner_id}")
-    public String createToDo(/*add needed parameters*/) {
-        //TODO
-    }
+//    @PostMapping("/create/users/{owner_id}")
+//    public String createToDo(/*add needed parameters*/) {
+//        //TODO
+//        return "test";
+//    }
 
     @GetMapping("/{todo_id}/update/users/{owner_id}")
-    public String update(/*add needed parameters*/) {
+    public String getToDoById(/*add needed parameters*/) {
         // TODO
+        return "update-todo";
     }
 
-    @PostMapping("/{todo_id}/update/users/{owner_id}")
-    public String update(/*add needed parameters*/) {
-        //TODO
-    }
-
-    @GetMapping("/{todo_id}/delete/users/{owner_id}")
-    public String delete(/*add needed parameters*/) {
-        //TODO
+    //
+//    @PostMapping("/{todo_id}/update/users/{owner_id}")
+//    public String update(/*add needed parameters*/) {
+//        //TODO
+//        return "test";
+//    }
+//
+    @PostMapping("/{todoId}/remove/users/{userId}")
+    public String removeTodo(@PathVariable Long todoId, @PathVariable Long userId) {
+        todoService.delete(todoId);
+        return "redirect:/todos/all/users/" + userId;
     }
 
     @GetMapping("/all/users/{user_id}")
-    public String getAll(/*add needed parameters*/) {
-       //TODO
+    public String getAll(@PathVariable String user_id, Model model) {
+
+        User user = userService.readById(Long.parseLong(user_id));
+        model.addAttribute("user", user);
+
+        return "todo-lists";
     }
 
-    @GetMapping("/{id}/add")
-    public String addCollaborator(/*add needed parameters*/) {
-        //TODO
-    }
-
-    @GetMapping("/{id}/remove")
-    public String removeCollaborator(/*add needed parameters*/) {
-        //TODO
-    }
+//    @GetMapping("/{id}/add")
+//    public String addCollaborator(/*add needed parameters*/) {
+//        //TODO
+//        return "test";
+//    }
+//
+//    @GetMapping("/{id}/remove")
+//    public String removeCollaborator(/*add needed parameters*/) {
+//        //TODO
+//        return "test";
+//    }
 }
