@@ -12,7 +12,7 @@
 <body>
 <div layout:fragment="content" class="container mt-5">
     <h2 class="text-center">Create New Task</h2>
-    <form th:action="@{|/tasks/create/todos/${todo.id}|}" th:object="${task}" method="post">
+    <form th:action="@{/tasks/create/todos/{todo_id}(todo_id=${todo.id})}" th:object="${task}" method="post">
 
         <input type="hidden" name="todoId" th:value="${todo.id}">
 

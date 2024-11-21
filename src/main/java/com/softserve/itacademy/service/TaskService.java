@@ -1,18 +1,19 @@
 package com.softserve.itacademy.service;
 
-import com.softserve.itacademy.dto.TaskTransformer;
+import com.softserve.itacademy.config.exception.NullEntityReferenceException;
 import com.softserve.itacademy.dto.TaskDto;
+import com.softserve.itacademy.dto.TaskTransformer;
 import com.softserve.itacademy.model.Task;
 import com.softserve.itacademy.repository.StateRepository;
-import com.softserve.itacademy.repository.ToDoRepository;
-import com.softserve.itacademy.config.exception.NullEntityReferenceException;
 import com.softserve.itacademy.repository.TaskRepository;
+import com.softserve.itacademy.repository.ToDoRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -40,12 +41,7 @@ public class TaskService {
     }
 
     public Task readById(long id) {
-
-        EntityNotFoundException exception = new EntityNotFoundException("Task with id " + id + " not found");
-        log.error(exception.getMessage(), exception);
-
-        return taskRepository.findById(id).orElseThrow(
-                () -> exception);
+        return taskRepository.findById(id).orElseThrow(()-> new EntityNotFoundException("Task with id " + id + " not found"));
     }
 
     public Task update(Task task) {
