@@ -39,7 +39,7 @@
             </td>
             <td th:text="${todo.createdAt}"></td>
             <td th:text="|${todo.owner.getFirstName()} ${todo.owner.getLastName()}|"></td>
-            <td class="text-center">
+            <td class="text-center align-middle">
                 <a th:href="@{|/todos/${todo.id}/update/users/${user_id}|}">Edit</a>
             </td>
             <td class="text-center">
