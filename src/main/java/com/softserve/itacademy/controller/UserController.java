@@ -68,15 +68,18 @@ public class UserController {
     }
 
 
-//    @GetMapping("/{id}/delete")
-//    public String delete(/*add needed parameters*/) {
-//        // TODO
-//    }
-//
+    @GetMapping("/{id}/delete")
+    public String delete(@PathVariable("id") Long id) {
+        userService.delete(id);
+        LOGGER.info("Deleted user with id: {}", id);
+        return "users-list";
+    }
+
     @GetMapping("/all")
     public String getAll(Model model) {
         List<UserDto> users = userService.findAll();
         model.addAttribute("users", users);
+        LOGGER.info("Retrieved users: {}", users.size());
         return "users-list";
     }
 }

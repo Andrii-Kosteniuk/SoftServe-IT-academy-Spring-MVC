@@ -28,8 +28,8 @@
                 <td><a th:href="@{/todos/all/users/{id}(id=${user.id})}" th:text="${user.firstName} + ' ' + ${user.lastName}"></a></td>
                 <td th:text="${user.email}"></td>
                 <td>
-                    <a th:href="@{/users/{id}/update(id=${user.id})}" class="btn btn-sm btn-outline-primary">Edit</a>
-                    <a th:href="@{/users/{id}/delete(id=${user.id})}" class="btn btn-sm btn-outline-danger">Remove</a>
+                    <a th:href="@{/users/{id}/update(id=${user.id})}" class="btn btn-link">Edit</a>
+                    <a th:href="@{/users/{id}/delete(id=${user.id})}" class="btn btn-link">Remove</a>
                 </td>
             </tr>
             </tbody>
