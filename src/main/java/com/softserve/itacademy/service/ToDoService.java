@@ -4,12 +4,18 @@ import com.softserve.itacademy.config.exception.NullEntityReferenceException;
 import com.softserve.itacademy.model.ToDo;
 import com.softserve.itacademy.repository.ToDoRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ToDoService {
+    private final static String STATIC_TIME_FORMAT = "yyyy-MM-dd HH:mm";
+
     private final ToDoRepository todoRepository;
 
     public ToDoService(ToDoRepository todoRepository) {
@@ -48,4 +54,15 @@ public class ToDoService {
     public List<ToDo> getByUserId(long userId) {
         return todoRepository.getByUserId(userId);
     }
+
+    public void changeDataFormat(List<ToDo> toDos) {
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(STATIC_TIME_FORMAT);
+
+        toDos.forEach(toDo -> {
+            LocalDateTime createdAt = toDo.getCreatedAt();
+            String formattedDate = createdAt.format(dateTimeFormatter);
+            toDo.setCreatedAt(LocalDateTime.parse(formattedDate, dateTimeFormatter));
+        });
+    }
+
 }
