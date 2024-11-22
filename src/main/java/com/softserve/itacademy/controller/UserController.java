@@ -1,5 +1,6 @@
 package com.softserve.itacademy.controller;
 
+import com.softserve.itacademy.config.exception.EmailAlreadyExistsException;
 import com.softserve.itacademy.dto.userDto.CreateUserDto;
 import com.softserve.itacademy.dto.userDto.UpdateUserDto;
 import com.softserve.itacademy.dto.userDto.UserDto;
@@ -36,8 +37,13 @@ public class UserController {
             return "create-user";
         }
 
-        UserDto userDto = userService.create(createUserDto);
-        return "redirect:/todos-user";
+        try {
+            userService.create(createUserDto);
+            return "redirect:/todos-user";
+        } catch (EmailAlreadyExistsException e) {
+            model.addAttribute("errorMessage", e.getMessage());
+            return "create-user";
+        }
     }
 
 
@@ -63,8 +69,13 @@ public class UserController {
             return "update-user";
         }
 
-        UserDto userDto = userService.update(updateUserDto);
-        return "redirect:/home";
+        try {
+            userService.update(updateUserDto);
+            return "redirect:/home";
+        } catch (EmailAlreadyExistsException e) {
+            model.addAttribute("errorMessage", e.getMessage());
+            return "update-user";
+        }
     }
 
 
@@ -72,7 +83,7 @@ public class UserController {
     public String delete(@PathVariable("id") Long id) {
         userService.delete(id);
         LOGGER.info("Deleted user with id: {}", id);
-        return "users-list";
+        return "redirect:/users/all";
     }
 
     @GetMapping("/all")
