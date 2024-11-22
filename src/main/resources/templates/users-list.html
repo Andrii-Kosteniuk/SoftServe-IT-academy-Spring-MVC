@@ -9,7 +9,8 @@
 </head>
 <body>
     <div layout:fragment="content" class="container mt-5">
-        <h2 class="text-center">List of Users</h2>
+        <h2 th:if="${!users.isEmpty()}" class="text-center">List of Users</h2>
+        <h2 th:if="${users.isEmpty()}" class="text-center">List of Users is empty</h2>
         <div class="d-flex justify-content-end mb-3">
             <a href="/users/create" class="btn btn-primary">Create new User</a>
         </div>
@@ -23,15 +24,15 @@
             </tr>
             </thead>
             <tbody>
-            <tr th:each="user, iterStat : ${users}">
-                <td th:text="${iterStat.count}"></td>
-                <td><a th:href="@{/todos/all/users/{id}(id=${user.id})}" th:text="${user.firstName} + ' ' + ${user.lastName}"></a></td>
-                <td th:text="${user.email}"></td>
-                <td>
-                    <a th:href="@{/users/{id}/update(id=${user.id})}" class="btn btn-link">Edit</a>
-                    <a th:href="@{/users/{id}/delete(id=${user.id})}" class="btn btn-link">Remove</a>
-                </td>
-            </tr>
+                <tr th:each="user, iterStat : ${users}">
+                    <td th:text="${iterStat.count}"></td>
+                    <td><a th:href="@{/todos/all/users/{id}(id=${user.id})}" th:text="${user.firstName} + ' ' + ${user.lastName}"></a></td>
+                    <td th:text="${user.email}"></td>
+                    <td>
+                        <a th:href="@{/users/{id}/update(id=${user.id})}" class="btn btn-link">Edit</a>
+                        <a th:href="@{/users/{id}/delete(id=${user.id})}" class="btn btn-link">Remove</a>
+                    </td>
+                </tr>
             </tbody>
         </table>
     </div>
