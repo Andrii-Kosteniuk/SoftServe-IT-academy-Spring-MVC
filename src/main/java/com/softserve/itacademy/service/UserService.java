@@ -70,6 +70,7 @@ public class UserService {
         }
         userDtoConverter.fillFields(user, updateUserDto);
         userRepository.save(user);
+        LOGGER.info("User successfully updated with ID: {} and email: {}", user.getId(), user.getEmail());
         return userDtoConverter.toDto(user);
     }
 
