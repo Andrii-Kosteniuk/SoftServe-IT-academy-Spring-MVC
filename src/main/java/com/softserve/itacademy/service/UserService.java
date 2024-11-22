@@ -1,6 +1,8 @@
 package com.softserve.itacademy.service;
 
+import com.softserve.itacademy.config.exception.EmailAlreadyExistsException;
 import com.softserve.itacademy.config.exception.NullEntityReferenceException;
+import com.softserve.itacademy.dto.userDto.CreateUserDto;
 import com.softserve.itacademy.dto.userDto.UpdateUserDto;
 import com.softserve.itacademy.dto.userDto.UserDto;
 import com.softserve.itacademy.dto.userDto.UserDtoConverter;
@@ -9,6 +11,8 @@ import com.softserve.itacademy.model.UserRole;
 import com.softserve.itacademy.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,14 +22,30 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
     private final UserRepository userRepository;
     private final UserDtoConverter userDtoConverter;
 
-    public User create(User role) {
-        if (role != null) {
-            return userRepository.save(role);
+    public UserDto create(CreateUserDto newUser) {
+        if (newUser == null) {
+            LOGGER.error("Attempted to create a user, but the provided CreateUserDto is null");
+            throw new NullEntityReferenceException("User cannot be 'null'");
         }
-        throw new NullEntityReferenceException("User cannot be 'null'");
+
+        LOGGER.info("Starting user creation process for email: {}", newUser.getEmail());
+
+        userRepository.findByEmail(newUser.getEmail()).ifPresent(existingUser -> {
+            LOGGER.warn("User with email {} already exists. Aborting creation.", newUser.getEmail());
+            throw new EmailAlreadyExistsException("User with email " + newUser.getEmail() + " already exists");
+        });
+
+        LOGGER.debug("No existing user found with email: {}. Proceeding with creation.", newUser.getEmail());
+        User user = new User();
+        userDtoConverter.fillFields(user, newUser);
+
+        User savedUser = userRepository.save(user);
+        LOGGER.info("User successfully created with ID: {} and email: {}", savedUser.getId(), savedUser.getEmail());
+        return userDtoConverter.toDto(savedUser);
     }
 
     public User readById(long id) {
