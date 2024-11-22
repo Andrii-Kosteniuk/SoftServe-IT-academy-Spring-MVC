@@ -24,21 +24,24 @@
                             <label for="firstName" class="form-label">First Name</label>
                             <input id="firstName" type="text" class="form-control" name="firstName" th:placeholder="*{firstName}" th:field="*{firstName}">
                             <div th:if="${#fields.hasErrors('firstName')}" class="text-danger">
-                                <p th:text="${#fields.errors('firstName')}"></p>
+                                <p th:each="error : ${#fields.errors('firstName')}" th:text="${error}"></p>
                             </div>
                         </div>
                         <div class="mb-3">
                             <label for="lastName" class="form-label">Last Name</label>
                             <input id="lastName" type="text" class="form-control" name="lastName" th:placeholder="*{lastName}" th:field="*{lastName}">
                             <div th:if="${#fields.hasErrors('lastName')}" class="text-danger">
-                                <p th:text="${#fields.errors('lastName')}"></p>
+                                <p th:each="error : ${#fields.errors('lastName')}" th:text="${error}"></p>
                             </div>
                         </div>
                         <div class="mb-3">
                             <label id="email" for="email" class="form-label">Email</label>
                             <input type="email" class="form-control" name="email" th:placeholder="*{email}" th:field="*{email}">
                             <div th:if="${#fields.hasErrors('email')}" class="text-danger">
-                                <p th:text="${#fields.errors('email')}"></p>
+                                <p th:each="error : ${#fields.errors('email')}" th:text="${error}"></p>
+                            </div>
+                            <div th:if="${errorMessage != null}" class="text-danger">
+                                <p th:text="${errorMessage}"></p>
                             </div>
                         </div>
                         <div class="mb-3">
@@ -48,7 +51,7 @@
                                 <option value="ADMIN" th:selected="*{role == 'ADMIN'}">Admin</option>
                             </select>
                             <div th:if="${#fields.hasErrors('role')}" class="text-danger">
-                                <p th:text="${#fields.errors('role')}"></p>
+                                <p th:each="error : ${#fields.errors('role')}" th:text="${error}"></p>
                             </div>
                         </div>
                         <div>
