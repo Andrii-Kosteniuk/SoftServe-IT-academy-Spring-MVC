@@ -1,6 +1,7 @@
 package com.softserve.itacademy.controller;
 
 import com.softserve.itacademy.dto.userDto.CreateUserDto;
+import com.softserve.itacademy.dto.userDto.UpdateUserDto;
 import com.softserve.itacademy.dto.userDto.UserDto;
 import com.softserve.itacademy.service.UserService;
 import jakarta.validation.Valid;
@@ -38,22 +39,33 @@ public class UserController {
     }
 
 
-//    @GetMapping("/{id}/read")
-//    public String read(/*add needed parameters*/) {
-//        //TODO
-//    }
-//
-//    @GetMapping("/{id}/update")
-//    public String update(/*add needed parameters*/) {
-//        //TODO
-//    }
-//
-//    @PostMapping("/{id}/update")
-//    public String update(/*add needed parameters*/) {
-//        //TODO
-//    }
-//
-//
+    @GetMapping("/{id}/read")
+    public String read(@PathVariable("id") Long id, Model model) {
+        UserDto userDto = userService.findByIdThrowing(id);
+        model.addAttribute("user", userDto);
+        return "user-info";
+    }
+
+    @GetMapping("/{id}/update")
+    public String update(@PathVariable("id") long id, Model model) {
+        UpdateUserDto updateUserDto = userService.findByIdToUpdate(id);
+
+        model.addAttribute("user", updateUserDto);
+        return "update-user";
+    }
+
+    @PostMapping("/{id}/update")
+    public String update(@ModelAttribute("user") @Valid UpdateUserDto updateUserDto, BindingResult bindingResult, Model model) {
+        if (bindingResult.hasErrors()) {
+            LOGGER.warn("Validation failed for user update. Errors: {}", bindingResult.getAllErrors());
+            return "update-user";
+        }
+
+        UserDto userDto = userService.update(updateUserDto);
+        return "redirect:/home";
+    }
+
+
 //    @GetMapping("/{id}/delete")
 //    public String delete(/*add needed parameters*/) {
 //        // TODO
