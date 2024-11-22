@@ -54,6 +54,16 @@ public class UserService {
     }
 
     public UserDto update(UpdateUserDto updateUserDto) {
+        if (updateUserDto == null) {
+            LOGGER.error("Attempted to update a user, but the provided UpdateUserDto is null");
+            throw new NullEntityReferenceException("User cannot be 'null'");
+        }
+
+        userRepository.findByEmail(updateUserDto.getEmail()).ifPresent(existingUser -> {
+            LOGGER.warn("User with email {} already exists. Aborting update.", updateUserDto.getEmail());
+            throw new EmailAlreadyExistsException("User with email " + updateUserDto.getEmail() + " already exists");
+        });
+
         User user = userRepository.findById(updateUserDto.getId()).orElseThrow(EntityNotFoundException::new);
         if (user.getRole() == UserRole.ADMIN) {
             user.setRole(updateUserDto.getRole());
@@ -86,5 +96,10 @@ public class UserService {
 
     public List<UserDto> findAll() {
         return userRepository.findAll().stream().map(userDtoConverter::toDto).toList();
+    }
+
+    public UpdateUserDto findByIdToUpdate(long id) {
+        User user = readById(id);
+        return userDtoConverter.toUpdateUserDto(user);
     }
 }
