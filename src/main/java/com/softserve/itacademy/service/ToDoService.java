@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class ToDoService {
-    private final static String STATIC_TIME_FORMAT = "dd.MM.yyyy HH:mm";
+    private final static String STATIC_TIME_FORMAT = "yyyy-MM-dd HH:mm";
 
     private final ToDoRepository todoRepository;
 
@@ -55,14 +55,14 @@ public class ToDoService {
         return todoRepository.getByUserId(userId);
     }
 
-    public List<ToDo> changeDataFormat(List<ToDo> toDos) {
+    public void changeDataFormat(List<ToDo> toDos) {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(STATIC_TIME_FORMAT);
 
-        toDos.forEach(toDo -> toDo.setCreatedAt(
-                LocalDateTime.parse(toDo.getCreatedAt().format(dateTimeFormatter))
-        ));
-
-        return toDos;
+        toDos.forEach(toDo -> {
+            LocalDateTime createdAt = toDo.getCreatedAt();
+            String formattedDate = createdAt.format(dateTimeFormatter);
+            toDo.setCreatedAt(LocalDateTime.parse(formattedDate, dateTimeFormatter));
+        });
     }
 
 }
