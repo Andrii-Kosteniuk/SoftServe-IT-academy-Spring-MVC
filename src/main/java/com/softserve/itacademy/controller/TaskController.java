@@ -28,28 +28,45 @@ public class TaskController {
     private final TaskTransformer taskTransformer;
     private final UserService userService;
 
+
     @GetMapping("/create/todos/{todo_id}")
-    public String create(@PathVariable("todo_id") long todo_id, @ModelAttribute("task") Task task, Model model) {
+    public String create(@PathVariable("todo_id") long todo_id, Model model) {
+
         ToDo toDo = todoService.readById(todo_id);
         TaskPriority[] priorities = TaskPriority.values();
 
-        model.addAttribute("task", task);
+        model.addAttribute("task", new Task());
         model.addAttribute("todo", toDo);
         model.addAttribute("priorities", priorities);
         return "create-task";
     }
 
     @PostMapping("/create/todos/{todo_id}")
-    public String create(@Valid @ModelAttribute("task") Task task, @PathVariable("todo_id") long todo_id, BindingResult result, Model model) {
-        if (result.hasErrors()) {
-            return "create-task";
-        }
+    public String create(@PathVariable("todo_id") long todo_id,
+                         @Valid @ModelAttribute("task") Task task,
+                         BindingResult result,
+                         RedirectAttributes redirectAttributes,
+                         Model model) {
+
         ToDo toDo = todoService.readById(todo_id);
         task.setTodo(toDo);
-        task.setState(stateService.getAll().get(0));
-        model.addAttribute("task", task);
-        taskService.create(taskTransformer.convertToDto(task));
+        task.setState(stateService.getByName("New"));
+        TaskPriority[] priorities = TaskPriority.values();
 
+        if (result.hasErrors()) {
+            model.addAttribute("task", task);
+            model.addAttribute("todo", toDo);
+            model.addAttribute("priorities", priorities);
+            return "create-task";
+        }
+//        if (taskService.getAll().contains(task)) {
+//            redirectAttributes.addFlashAttribute("successCreateTaskMessage",
+//                    "Task " + task.getName() + " was created");
+//        } else {
+//            redirectAttributes.addFlashAttribute("errorCreateTaskMessage",
+//                    "Task + " + task.getName() + " already exists");
+//        }
+        taskService.create(taskTransformer.convertToDto(task));
         return "redirect:/tasks/todos/" + todo_id;
     }
 
@@ -58,17 +75,14 @@ public class TaskController {
                                  @PathVariable("todo_id") long todo_id,
                                  Model model) {
 
-        Task task = taskService.readById(task_id);
-
         ToDo toDo = todoService.readById(todo_id);
         List<State> states = stateService.getAll();
         TaskPriority[] priorities = TaskPriority.values();
 
-        model.addAttribute("task", task);
+        model.addAttribute("task", taskService.readById(task_id));
         model.addAttribute("todo", toDo);
         model.addAttribute("states", states);
         model.addAttribute("priorities", priorities);
-
         return "update-task";
     }
 
@@ -76,23 +90,28 @@ public class TaskController {
     public String update(@PathVariable("task_id") long task_id,
                          @PathVariable("todo_id") long todo_id,
                          @Valid @ModelAttribute("task") Task task,
+                         BindingResult bindingResult,
                          Model model) {
         ToDo toDo = todoService.readById(todo_id);
-
+        List<State> states = stateService.getAll();
+        TaskPriority[] priorities = TaskPriority.values();
         task.setId(task_id);
         task.setTodo(toDo);
-        model.addAttribute("todo", toDo);
-        model.addAttribute("task", task);
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("task", task);
+            model.addAttribute("todo", toDo);
+            model.addAttribute("states", states);
+            model.addAttribute("priorities", priorities);
+            return "update-task";
+        }
 
         taskService.update(task);
-
         return "redirect:/tasks/todos/" + todo_id;
     }
 
     @PostMapping("/{task_id}/delete/todos/{todo_id}")
     public String delete(@PathVariable("task_id") long task_id,
                          @PathVariable("todo_id") long todo_id,
-                         Model model,
                          RedirectAttributes redirectAttributes) {
 
         String name = taskService.readById(task_id).getName();
@@ -138,7 +157,7 @@ public class TaskController {
         User user = userService.readById(collaborator_id);
         String name = user.getFirstName() + " " + user.getLastName();
 
-        if (!collaborators.contains(user)) {
+        if (! collaborators.contains(user)) {
             collaborators.add(user);
             todoService.update(toDo);
             redirectAttributes.addFlashAttribute("successAddCollaboratorMessage",
@@ -165,4 +184,5 @@ public class TaskController {
 
         return "todo-tasks";
     }
+
 }

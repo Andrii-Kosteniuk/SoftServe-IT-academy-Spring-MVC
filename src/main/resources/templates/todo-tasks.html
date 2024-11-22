@@ -11,7 +11,7 @@
     <title>Tasks of To-Do List</title>
 </head>
 <body>
-<div layout:fragment="content" class="container mt-5">
+<div layout:fragment="content" class="container">
     <div class="container">
         <h3 class="mb-3 text-start" th:inline="text">All tasks from, <span th:text="${todo.title}">todo </span></h3>
 
@@ -24,7 +24,7 @@
                 <span th:text="${successDeleteTaskMessage}"></span>
             </div>
         </div>
-        <table class="table table-striped">
+        <table class="table table-striped text-center">
             <thead>
             <tr>
                 <th>No</th>
@@ -67,6 +67,11 @@
                 <span th:text="${successDeleteCollaboratorMessage}"></span>
             </div>
         </div>
+        <div th:if="${successCreateTaskMessage}">
+            <div class="alert alert-info text-center">
+                <span th:text="${successCreateTaskMessage}"></span>
+            </div>
+        </div>
         <div th:if="${successAddCollaboratorMessage}">
             <div class="alert alert-info text-center">
                 <span th:text="${successAddCollaboratorMessage}"></span>
@@ -95,7 +100,6 @@
                         <td>
                             <a th:href="@{/tasks/delete/todos/{todo_id}/collaborator/{collaborator_id}(todo_id=${todo.id},collaborator_id=${owner.id})}"
                                class="btn btn-sm btn-danger">Remove</a>
-
                         </td>
                     </tr>
                     </tbody>
@@ -110,14 +114,16 @@
                         <form method="post"
                               th:object="${collaborator}"
                               th:action="@{/tasks/todos/{todo_id}/add/collaborator(todo_id=${todo.id})}">
-                            <div class="col-auto">
+                            <div class="input-group mb-3 gap-2">
                                 <select name="collaboratorId" id="collaborator" class="form-select">
                                     <option th:each="user : ${allCollaborators}"
                                             th:value="${user.id}"
                                             th:text="${user.firstName + ' ' + user.lastName}">
                                     </option>
                                 </select>
-                                <input type="submit" class="btn btn-sm btn-success" value="Add"/>
+
+                                    <input type="submit" class="btn btn-sm btn-success" value="Add"/>
+
                             </div>
                         </form>
                     </div>

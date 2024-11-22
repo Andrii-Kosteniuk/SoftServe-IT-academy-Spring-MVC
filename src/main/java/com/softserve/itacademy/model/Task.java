@@ -1,6 +1,8 @@
 package com.softserve.itacademy.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,6 +19,7 @@ public class Task {
     private long id;
 
     @Column(name = "name", nullable = false)
+    @NotBlank(message = "The 'name' cannot be empty")
     private String name;
 
     @Enumerated(EnumType.STRING)
