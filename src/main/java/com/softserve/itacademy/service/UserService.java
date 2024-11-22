@@ -59,12 +59,15 @@ public class UserService {
             throw new NullEntityReferenceException("User cannot be 'null'");
         }
 
-        userRepository.findByEmail(updateUserDto.getEmail()).ifPresent(existingUser -> {
-            LOGGER.warn("User with email {} already exists. Aborting update.", updateUserDto.getEmail());
-            throw new EmailAlreadyExistsException("User with email " + updateUserDto.getEmail() + " already exists");
-        });
-
         User user = userRepository.findById(updateUserDto.getId()).orElseThrow(EntityNotFoundException::new);
+
+        if (!user.getEmail().equals(updateUserDto.getEmail())) {
+            userRepository.findByEmail(updateUserDto.getEmail()).ifPresent(existingUser -> {
+                LOGGER.warn("User with email {} already exists. Aborting update.", updateUserDto.getEmail());
+                throw new EmailAlreadyExistsException("User with email " + updateUserDto.getEmail() + " already exists");
+            });
+        }
+
         if (user.getRole() == UserRole.ADMIN) {
             user.setRole(updateUserDto.getRole());
         }
