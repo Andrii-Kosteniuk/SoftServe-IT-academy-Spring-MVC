@@ -34,4 +34,15 @@ public class UserDtoConverter {
         user.setMyTodos(new ArrayList<>()); //to avoid null
         user.setOtherTodos(new ArrayList<>()); //to avoid null
     }
+
+    public UpdateUserDto toUpdateUserDto(User user) {
+        UpdateUserDto updateUserDto = new UpdateUserDto();
+        updateUserDto.setId(user.getId());
+        updateUserDto.setFirstName(user.getFirstName());
+        updateUserDto.setLastName(user.getLastName());
+        updateUserDto.setEmail(user.getEmail());
+        updateUserDto.setRole(user.getRole());
+
+        return updateUserDto;
+    }
 }
