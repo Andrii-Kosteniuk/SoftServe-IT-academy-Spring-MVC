@@ -17,16 +17,13 @@
         <div class="mb-3">
             <label for="id" class="form-label">Id</label>
             <input type="text" class="form-control" disabled th:field="*{id}" id="id">
-            <div class="invalid-feedback d-block">
-                <span th:if="${#fields.hasErrors('title')}" th:errors="*{getId()()}"></span>
-            </div>
         </div>
 
         <div class="mb-3">
             <label for="title" class="form-label">Title</label>
             <input type="text" class="form-control" th:field="*{title}" id="title">
-            <div class="invalid-feedback d-block">
-                <span th:if="${#fields.hasErrors('title')}" th:errors="*{getTitle()}"></span>
+            <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('title')}">
+                <span th:errors="*{title}"></span>
             </div>
         </div>
 
@@ -35,6 +32,8 @@
             <input type="submit" class="btn btn-primary" value="Update"/>
         </div>
     </form>
+
+    <a th:href="@{|/todos/all/users/${owner_id}|}" class="btn btn-link mt-3">Go to ToDo List</a>
 
 </div>
 

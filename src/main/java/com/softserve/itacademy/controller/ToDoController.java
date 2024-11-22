@@ -58,14 +58,18 @@ public class ToDoController {
             @PathVariable String todo_id,
             @PathVariable String owner_id,
             @Valid @ModelAttribute("todo") ToDo toDo,
-            BindingResult bindingResult
+            BindingResult bindingResult,
+            Model model
     ) {
 
+        ToDo existingToDo = todoService.readById(Long.parseLong(todo_id));
+
         if (bindingResult.hasErrors()) {
+            toDo.setId(existingToDo.getId());
+            model.addAttribute("todo", toDo);
             return "update-todo";
         }
 
-        ToDo existingToDo = todoService.readById(Long.parseLong(todo_id));
         existingToDo.setTitle(toDo.getTitle());
         todoService.update(existingToDo);
 
