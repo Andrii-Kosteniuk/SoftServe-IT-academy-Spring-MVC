@@ -53,7 +53,7 @@ public class UserService {
             return userDtoConverter.toDto(savedUser);
         } catch (BusinessException e) {
             throw e;
-        } catch (DatabaseConnectionException e) {
+        } catch (DataAccessException e) {
             LOGGER.error("Database connection error while creating user with email: {}", newUser.getEmail(), e);
             throw new BusinessException("500", DATABASE_CONNECTION_ERROR);
         } catch (Exception e) {
@@ -71,7 +71,7 @@ public class UserService {
             });
         } catch (BusinessException e) {
             throw e;
-        }catch (DatabaseConnectionException e) {
+        }catch (DataAccessException e) {
             LOGGER.error("Database connection error while finding user with ID: {}", id, e);
             throw new BusinessException("500", DATABASE_CONNECTION_ERROR);
         } catch (Exception e) {
@@ -114,7 +114,7 @@ public class UserService {
 
         } catch (BusinessException e) {
             throw e;
-        } catch (DatabaseConnectionException e) {
+        } catch (DataAccessException e) {
             LOGGER.error("Database connection error while updating user with ID: {}", updateUserDto.getId(), e);
             throw new BusinessException("500", DATABASE_CONNECTION_ERROR);
         } catch (Exception e) {
@@ -160,7 +160,7 @@ public class UserService {
             return userRepository.findAll().stream()
                     .map(userDtoConverter::toDto)
                     .toList();
-        } catch (DatabaseConnectionException e) {
+        } catch (DataAccessException e) {
             LOGGER.error("Database connection error during fetching all users: {}", e.getMessage(), e);
             throw new BusinessException("500", DATABASE_CONNECTION_ERROR);
         } catch (Exception e) {
