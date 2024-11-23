@@ -130,10 +130,21 @@ public class UserController {
 
 
     @GetMapping("/{id}/delete")
-    public String delete(@PathVariable("id") Long id) {
-        userService.delete(id);
-        LOGGER.info("Deleted user with id: {}", id);
-        return "redirect:/users/all";
+    public String delete(@PathVariable("id") Long id, Model model) {
+        try {
+            userService.delete(id);
+            LOGGER.info("Deleted user with id: {}", id);
+            return "redirect:/users/all";
+        } catch (EntityNotFoundException e) {
+            LOGGER.error("User not found with ID: {}", id);
+            model.addAttribute("code", "404");
+            model.addAttribute("errorMessage", "User not found. Please check the ID and try again.");
+            return "not-found";
+        } catch (Exception e) {
+            LOGGER.error("Unexpected error during user deletion: {}", e.getMessage());
+            model.addAttribute("errorMessage", "An unexpected error occurred. Please try again later.");
+            return "bad-request";
+        }
     }
 
     @GetMapping("/all")
