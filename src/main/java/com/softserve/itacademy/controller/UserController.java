@@ -6,6 +6,7 @@ import com.softserve.itacademy.dto.userDto.CreateUserDto;
 import com.softserve.itacademy.dto.userDto.UpdateUserDto;
 import com.softserve.itacademy.dto.userDto.UserDto;
 import com.softserve.itacademy.service.UserService;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -54,8 +55,9 @@ public class UserController {
             return "create-user";
         } catch (NullEntityReferenceException e) {
             LOGGER.error("Null entity reference error: {}", e.getMessage());
-            model.addAttribute("errorMessage", "Internal error occurred. Please try again later.");
-            return "bad-request";
+            model.addAttribute("code", "500");
+            model.addAttribute("message", "Internal error occurred. Please try again later.");
+            return "error";
         } catch (Exception e) {
             LOGGER.error("Unexpected error during user creation: {}", e.getMessage());
             model.addAttribute("errorMessage", "An unexpected error occurred. Please try again later.");
@@ -66,17 +68,39 @@ public class UserController {
 
     @GetMapping("/{id}/read")
     public String read(@PathVariable("id") Long id, Model model) {
-        UserDto userDto = userService.findByIdThrowing(id);
-        model.addAttribute("user", userDto);
-        return "user-info";
+        try {
+            UserDto userDto = userService.findByIdThrowing(id);
+            model.addAttribute("user", userDto);
+            return "user-info";
+        } catch (EntityNotFoundException e) {
+            LOGGER.error("User not found with ID: {}", id);
+            model.addAttribute("code", "404");
+            model.addAttribute("errorMessage", "User not found. Please check the ID and try again.");
+            return "not-found";
+        } catch (Exception e) {
+            LOGGER.error("Unexpected error during user read: {}", e.getMessage());
+            model.addAttribute("message", "An unexpected error occurred. Please try again later.");
+            return "bad-request";
+        }
     }
 
     @GetMapping("/{id}/update")
     public String update(@PathVariable("id") long id, Model model) {
-        UpdateUserDto updateUserDto = userService.findByIdToUpdate(id);
+        try {
+            UpdateUserDto updateUserDto = userService.findByIdToUpdate(id);
 
-        model.addAttribute("user", updateUserDto);
-        return "update-user";
+            model.addAttribute("user", updateUserDto);
+            return "update-user";
+        } catch (EntityNotFoundException e) {
+            LOGGER.error("User not found with ID: {}", id);
+            model.addAttribute("code", "404");
+            model.addAttribute("errorMessage", "User not found. Please check the ID and try again.");
+            return "not-found";
+        } catch (Exception e) {
+            LOGGER.error("Unexpected error during user update: {}", e.getMessage());
+            model.addAttribute("errorMessage", "An unexpected error occurred. Please try again later.");
+            return "bad-request";
+        }
     }
 
     @PostMapping("/{id}/update")
