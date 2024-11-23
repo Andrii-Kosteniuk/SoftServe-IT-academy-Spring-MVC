@@ -1,7 +1,6 @@
 package com.softserve.itacademy.service;
 
 import com.softserve.itacademy.config.exception.BusinessException;
-import com.softserve.itacademy.config.exception.DatabaseConnectionException;
 import com.softserve.itacademy.dto.userDto.CreateUserDto;
 import com.softserve.itacademy.dto.userDto.UpdateUserDto;
 import com.softserve.itacademy.dto.userDto.UserDto;
