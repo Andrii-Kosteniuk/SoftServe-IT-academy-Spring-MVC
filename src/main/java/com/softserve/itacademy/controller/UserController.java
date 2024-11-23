@@ -61,8 +61,9 @@ public class UserController {
             return "error";
         } catch (DatabaseConnectionException e) {
             LOGGER.error("Database connection error: {}", e.getMessage(), e);
-            model.addAttribute("errorMessage", "Unable to connect to the database. Please try again later.");
-            return "bad-request";
+            model.addAttribute("code", "500");
+            model.addAttribute("message", "An internal server error occurred. Please try again later.");
+            return "error";
         } catch (Exception e) {
             LOGGER.error("Unexpected error during user creation: {}", e.getMessage());
             model.addAttribute("errorMessage", "An unexpected error occurred. Please try again later.");
@@ -84,8 +85,9 @@ public class UserController {
             return "not-found";
         } catch (DatabaseConnectionException e) {
             LOGGER.error("Database connection error while fetching user with ID {}: {}", id, e.getMessage());
-            model.addAttribute("errorMessage", "Unable to connect to the database. Please try again later.");
-            return "bad-request";
+            model.addAttribute("code", "500");
+            model.addAttribute("message", "An internal server error occurred. Please try again later.");
+            return "error";
         } catch (Exception e) {
             LOGGER.error("Unexpected error during user read: {}", e.getMessage());
             model.addAttribute("errorMessage", "An unexpected error occurred. Please try again later.");
@@ -105,6 +107,11 @@ public class UserController {
             model.addAttribute("code", "404");
             model.addAttribute("errorMessage", "User not found. Please check the ID and try again.");
             return "not-found";
+        } catch (DatabaseConnectionException e) {
+            LOGGER.error("Database connection error while fetching user with ID {}: {}", id, e.getMessage());
+            model.addAttribute("code", "500");
+            model.addAttribute("message", "An internal server error occurred. Please try again later.");
+            return "error";
         } catch (Exception e) {
             LOGGER.error("Unexpected error during user update: {}", e.getMessage());
             model.addAttribute("errorMessage", "An unexpected error occurred. Please try again later.");
@@ -136,6 +143,11 @@ public class UserController {
             LOGGER.error("Null entity reference error: {}", e.getMessage());
             model.addAttribute("code", "500");
             model.addAttribute("message", "Internal error occurred. Please try again later.");
+            return "error";
+        } catch (DatabaseConnectionException e) {
+            LOGGER.error("Database connection error while updating user with ID {}: {}", id, e.getMessage());
+            model.addAttribute("code", "500");
+            model.addAttribute("message", "An internal server error occurred. Please try again later.");
             return "error";
         } catch (Exception e) {
             LOGGER.error("Unexpected error during user update: {}", e.getMessage());

@@ -75,22 +75,33 @@ public class UserService {
             throw new NullEntityReferenceException("User cannot be 'null'");
         }
 
-        User user = userRepository.findById(updateUserDto.getId()).orElseThrow(EntityNotFoundException::new);
+        try {
+            User user = userRepository.findById(updateUserDto.getId())
+                    .orElseThrow(() -> {
+                        LOGGER.error("User not found with ID: {}", updateUserDto.getId());
+                        return new EntityNotFoundException("User with ID " + updateUserDto.getId() + " not found");
+                    });
 
-        if (!user.getEmail().equals(updateUserDto.getEmail())) {
-            userRepository.findByEmail(updateUserDto.getEmail()).ifPresent(existingUser -> {
-                LOGGER.warn("User with email {} already exists. Aborting update.", updateUserDto.getEmail());
-                throw new EmailAlreadyExistsException("User with email " + updateUserDto.getEmail() + " already exists");
-            });
-        }
+            if (!user.getEmail().equals(updateUserDto.getEmail())) {
+                userRepository.findByEmail(updateUserDto.getEmail()).ifPresent(existingUser -> {
+                    LOGGER.warn("User with email {} already exists. Aborting update.", updateUserDto.getEmail());
+                    throw new EmailAlreadyExistsException("User with email " + updateUserDto.getEmail() + " already exists");
+                });
+            }
 
-        if (user.getRole() == UserRole.ADMIN) {
-            user.setRole(updateUserDto.getRole());
+            if (user.getRole() == UserRole.ADMIN) {
+                user.setRole(updateUserDto.getRole());
+            }
+
+            userDtoConverter.fillFields(user, updateUserDto);
+            userRepository.save(user);
+            LOGGER.info("User successfully updated with ID: {} and email: {}", user.getId(), user.getEmail());
+            return userDtoConverter.toDto(user);
+
+        } catch (DataAccessException e) {
+            LOGGER.error("Database access error occurred while updating user with ID: {}", updateUserDto.getId(), e);
+            throw new DatabaseConnectionException("Database access error occurred.", e);
         }
-        userDtoConverter.fillFields(user, updateUserDto);
-        userRepository.save(user);
-        LOGGER.info("User successfully updated with ID: {} and email: {}", user.getId(), user.getEmail());
-        return userDtoConverter.toDto(user);
     }
 
     public void delete(long id) {
