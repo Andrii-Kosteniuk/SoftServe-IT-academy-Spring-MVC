@@ -1,13 +1,10 @@
 package com.softserve.itacademy.controller;
 
-import com.softserve.itacademy.config.exception.DatabaseConnectionException;
-import com.softserve.itacademy.config.exception.EmailAlreadyExistsException;
-import com.softserve.itacademy.config.exception.NullEntityReferenceException;
+import com.softserve.itacademy.config.exception.BusinessException;
 import com.softserve.itacademy.dto.userDto.CreateUserDto;
 import com.softserve.itacademy.dto.userDto.UpdateUserDto;
 import com.softserve.itacademy.dto.userDto.UserDto;
 import com.softserve.itacademy.service.UserService;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -50,24 +47,9 @@ public class UserController {
             LOGGER.info("User logged in after successful registration: {}", userDto.getEmail());
 
             return "redirect:/todos-user";
-        } catch (EmailAlreadyExistsException e) {
-            LOGGER.warn("Failed to create user: {}", e.getMessage());
-            model.addAttribute("errorMessage", e.getMessage());
-            return "create-user";
-        } catch (NullEntityReferenceException e) {
-            LOGGER.error("Null entity reference error: {}", e.getMessage());
-            model.addAttribute("code", "500");
-            model.addAttribute("message", "Internal error occurred. Please try again later.");
-            return "error";
-        } catch (DatabaseConnectionException e) {
-            LOGGER.error("Database connection error: {}", e.getMessage(), e);
-            model.addAttribute("code", "500");
-            model.addAttribute("message", "An internal server error occurred. Please try again later.");
-            return "error";
-        } catch (Exception e) {
-            LOGGER.error("Unexpected error during user creation: {}", e.getMessage());
-            model.addAttribute("errorMessage", "An unexpected error occurred. Please try again later.");
-            return "bad-request";
+        } catch (BusinessException e) {
+            String status = handleBusinessException(e, model);
+            return status.equals("conflict") ? "create-user" : status;
         }
     }
 
@@ -78,20 +60,8 @@ public class UserController {
             UserDto userDto = userService.findByIdThrowing(id);
             model.addAttribute("user", userDto);
             return "user-info";
-        } catch (EntityNotFoundException e) {
-            LOGGER.error("User not found with ID: {}", id);
-            model.addAttribute("code", "404");
-            model.addAttribute("errorMessage", "User not found. Please check the ID and try again.");
-            return "not-found";
-        } catch (DatabaseConnectionException e) {
-            LOGGER.error("Database connection error while fetching user with ID {}: {}", id, e.getMessage());
-            model.addAttribute("code", "500");
-            model.addAttribute("message", "An internal server error occurred. Please try again later.");
-            return "error";
-        } catch (Exception e) {
-            LOGGER.error("Unexpected error during user read: {}", e.getMessage());
-            model.addAttribute("errorMessage", "An unexpected error occurred. Please try again later.");
-            return "bad-request";
+        } catch (BusinessException e) {
+            return handleBusinessException(e, model);
         }
     }
 
@@ -102,20 +72,9 @@ public class UserController {
 
             model.addAttribute("user", updateUserDto);
             return "update-user";
-        } catch (EntityNotFoundException e) {
-            LOGGER.error("User not found with ID: {}", id);
-            model.addAttribute("code", "404");
-            model.addAttribute("errorMessage", "User not found. Please check the ID and try again.");
-            return "not-found";
-        } catch (DatabaseConnectionException e) {
-            LOGGER.error("Database connection error while fetching user with ID {}: {}", id, e.getMessage());
-            model.addAttribute("code", "500");
-            model.addAttribute("message", "An internal server error occurred. Please try again later.");
-            return "error";
-        } catch (Exception e) {
-            LOGGER.error("Unexpected error during user update: {}", e.getMessage());
-            model.addAttribute("errorMessage", "An unexpected error occurred. Please try again later.");
-            return "bad-request";
+        } catch (BusinessException e) {
+            String status = handleBusinessException(e, model);
+            return status.equals("conflict") ? "update-user" : status;
         }
     }
 
@@ -136,23 +95,8 @@ public class UserController {
             }
 
             return "redirect:/home";
-        } catch (EmailAlreadyExistsException e) {
-            model.addAttribute("errorMessage", e.getMessage());
-            return "update-user";
-        } catch (NullEntityReferenceException e) {
-            LOGGER.error("Null entity reference error: {}", e.getMessage());
-            model.addAttribute("code", "500");
-            model.addAttribute("message", "Internal error occurred. Please try again later.");
-            return "error";
-        } catch (DatabaseConnectionException e) {
-            LOGGER.error("Database connection error while updating user with ID {}: {}", id, e.getMessage());
-            model.addAttribute("code", "500");
-            model.addAttribute("message", "An internal server error occurred. Please try again later.");
-            return "error";
-        } catch (Exception e) {
-            LOGGER.error("Unexpected error during user update: {}", e.getMessage());
-            model.addAttribute("errorMessage", "An unexpected error occurred. Please try again later.");
-            return "bad-request";
+        } catch (BusinessException e) {
+            return handleBusinessException(e, model);
         }
     }
 
@@ -163,17 +107,10 @@ public class UserController {
             userService.delete(id);
             LOGGER.info("Deleted user with id: {}", id);
             return "redirect:/users/all";
-        } catch (EntityNotFoundException e) {
-            LOGGER.error("User not found with ID: {}", id);
-            model.addAttribute("code", "404");
-            model.addAttribute("errorMessage", "User not found. Please check the ID and try again.");
-            return "not-found";
-        } catch (Exception e) {
-            LOGGER.error("Unexpected error during user deletion: {}", e.getMessage());
-            model.addAttribute("errorMessage", "An unexpected error occurred. Please try again later.");
-            return "bad-request";
+        } catch (BusinessException e) {
+            return handleBusinessException(e, model);
         }
-    }
+     }
 
     @GetMapping("/all")
     public String getAll(Model model) {
@@ -182,10 +119,18 @@ public class UserController {
             model.addAttribute("users", users);
             LOGGER.info("Retrieved users: {}", users.size());
             return "users-list";
-        } catch (Exception e) {
-            LOGGER.error("Unexpected error during user retrieval", e);
-            model.addAttribute("errorMessage", "An unexpected error occurred. Please try again later.");
-            return "bad-request";
+        } catch (BusinessException e) {
+            return handleBusinessException(e, model);
         }
+    }
+
+    private String handleBusinessException(BusinessException e, Model model) {
+        model.addAttribute("errorMessage", e.getMessage());
+        return switch (e.getCode()) {
+            case "404" -> "not-found";
+            case "500" -> "error";
+            case "409" -> "conflict";
+            default -> "bad-request";
+        };
     }
 }

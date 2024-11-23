@@ -1,8 +1,7 @@
 package com.softserve.itacademy.service;
 
+import com.softserve.itacademy.config.exception.BusinessException;
 import com.softserve.itacademy.config.exception.DatabaseConnectionException;
-import com.softserve.itacademy.config.exception.EmailAlreadyExistsException;
-import com.softserve.itacademy.config.exception.NullEntityReferenceException;
 import com.softserve.itacademy.dto.userDto.CreateUserDto;
 import com.softserve.itacademy.dto.userDto.UpdateUserDto;
 import com.softserve.itacademy.dto.userDto.UserDto;
@@ -20,6 +19,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
+import static com.softserve.itacademy.config.exception.ErrorMessage.*;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -31,15 +32,15 @@ public class UserService {
     public UserDto create(CreateUserDto newUser) {
         if (newUser == null) {
             LOGGER.error("Attempted to create a user, but the provided CreateUserDto is null");
-            throw new NullEntityReferenceException("User cannot be 'null'");
+            throw new BusinessException("400", NULL_ENTITY_REFERENCE);
         }
 
-        LOGGER.info("Starting user creation process for email: {}", newUser.getEmail());
-
         try {
+            LOGGER.info("Starting user creation process for email: {}", newUser.getEmail());
+
             userRepository.findByEmail(newUser.getEmail()).ifPresent(existingUser -> {
                 LOGGER.warn("User with email {} already exists. Aborting creation.", newUser.getEmail());
-                throw new EmailAlreadyExistsException("User with email " + newUser.getEmail() + " already exists");
+                throw new BusinessException("409", EMAIL_ALREADY_EXISTS);
             });
 
             LOGGER.debug("No existing user found with email: {}. Proceeding with creation.", newUser.getEmail());
@@ -50,9 +51,13 @@ public class UserService {
             User savedUser = userRepository.save(user);
             LOGGER.info("User successfully created with ID: {} and email: {}", savedUser.getId(), savedUser.getEmail());
             return userDtoConverter.toDto(savedUser);
-        } catch (DataAccessException e) {
-            LOGGER.error("Database error while creating user with email {}: {}", newUser.getEmail(), e.getMessage(), e);
-            throw new DatabaseConnectionException("Failed to connect to the database during user creation", e);
+
+        } catch (DatabaseConnectionException e) {
+            LOGGER.error("Database connection error while creating user with email: {}", newUser.getEmail(), e);
+            throw new BusinessException("500", DATABASE_CONNECTION_ERROR);
+        } catch (Exception e) {
+            LOGGER.error("Unexpected error while creating user with email: {}", newUser.getEmail(), e);
+            throw new BusinessException("400", UNEXPECTED_ERROR);
         }
     }
 
@@ -61,31 +66,36 @@ public class UserService {
             LOGGER.info("Attempting to find user with ID: {}", id);
             return userRepository.findById(id).orElseThrow(() -> {
                 LOGGER.error("User with ID {} not found", id);
-                return new EntityNotFoundException("User with ID " + id + " not found");
+                return new BusinessException("404", USER_NOT_FOUND);
             });
-        } catch (DataAccessException e) {
-            LOGGER.error("Database access error occurred while finding user with ID: {}", id, e);
-            throw new DatabaseConnectionException("Database access error occurred", e);
+        } catch (DatabaseConnectionException e) {
+            LOGGER.error("Database connection error while finding user with ID: {}", id, e);
+            throw new BusinessException("500", DATABASE_CONNECTION_ERROR);
+        } catch (Exception e) {
+            LOGGER.error("Unexpected error while finding user with ID: {}", id, e);
+            throw new BusinessException("400", UNEXPECTED_ERROR);
         }
     }
 
     public UserDto update(UpdateUserDto updateUserDto) {
         if (updateUserDto == null) {
             LOGGER.error("Attempted to update a user, but the provided UpdateUserDto is null");
-            throw new NullEntityReferenceException("User cannot be 'null'");
+            throw new BusinessException("400", NULL_ENTITY_REFERENCE);
         }
 
         try {
+            LOGGER.info("Starting update process for user with ID: {}", updateUserDto.getId());
+
             User user = userRepository.findById(updateUserDto.getId())
                     .orElseThrow(() -> {
                         LOGGER.error("User not found with ID: {}", updateUserDto.getId());
-                        return new EntityNotFoundException("User with ID " + updateUserDto.getId() + " not found");
+                        return new BusinessException("404", USER_NOT_FOUND);
                     });
 
             if (!user.getEmail().equals(updateUserDto.getEmail())) {
                 userRepository.findByEmail(updateUserDto.getEmail()).ifPresent(existingUser -> {
                     LOGGER.warn("User with email {} already exists. Aborting update.", updateUserDto.getEmail());
-                    throw new EmailAlreadyExistsException("User with email " + updateUserDto.getEmail() + " already exists");
+                    throw new BusinessException("409", EMAIL_ALREADY_EXISTS);
                 });
             }
 
@@ -94,19 +104,34 @@ public class UserService {
             }
 
             userDtoConverter.fillFields(user, updateUserDto);
-            userRepository.save(user);
-            LOGGER.info("User successfully updated with ID: {} and email: {}", user.getId(), user.getEmail());
-            return userDtoConverter.toDto(user);
+            User updatedUser = userRepository.save(user);
 
-        } catch (DataAccessException e) {
-            LOGGER.error("Database access error occurred while updating user with ID: {}", updateUserDto.getId(), e);
-            throw new DatabaseConnectionException("Database access error occurred.", e);
+            LOGGER.info("User successfully updated with ID: {} and email: {}", updatedUser.getId(), updatedUser.getEmail());
+            return userDtoConverter.toDto(updatedUser);
+
+        } catch (DatabaseConnectionException e) {
+            LOGGER.error("Database connection error while updating user with ID: {}", updateUserDto.getId(), e);
+            throw new BusinessException("500", DATABASE_CONNECTION_ERROR);
+        } catch (Exception e) {
+            LOGGER.error("Unexpected error while updating user with ID: {}", updateUserDto.getId(), e);
+            throw new BusinessException("400", UNEXPECTED_ERROR);
         }
     }
 
     public void delete(long id) {
-        User user = readById(id);
-        userRepository.delete(user);
+        try {
+            User user = readById(id);
+            userRepository.delete(user);
+        } catch (EntityNotFoundException e) {
+            LOGGER.error("User not found with ID: {}", id);
+            throw new BusinessException("404", USER_NOT_FOUND);
+        } catch (DataAccessException e) {
+            LOGGER.error("Database connection error while deleting user with ID {}: {}", id, e.getMessage());
+            throw new BusinessException("500", DATABASE_CONNECTION_ERROR);
+        } catch (Exception e) {
+            LOGGER.error("Unexpected error during user deletion: {}", e.getMessage());
+            throw new BusinessException("400", UNEXPECTED_ERROR);
+        }
     }
 
     public List<User> getAll() {
@@ -126,11 +151,32 @@ public class UserService {
     }
 
     public List<UserDto> findAll() {
-        return userRepository.findAll().stream().map(userDtoConverter::toDto).toList();
+        try {
+            return userRepository.findAll().stream()
+                    .map(userDtoConverter::toDto)
+                    .toList();
+        } catch (DatabaseConnectionException e) {
+            LOGGER.error("Database connection error during fetching all users: {}", e.getMessage(), e);
+            throw new BusinessException("500", DATABASE_CONNECTION_ERROR);
+        } catch (Exception e) {
+            LOGGER.error("Unexpected error during fetching all users: {}", e.getMessage(), e);
+            throw new BusinessException("400", UNEXPECTED_ERROR);
+        }
     }
 
     public UpdateUserDto findByIdToUpdate(long id) {
-        User user = readById(id);
-        return userDtoConverter.toUpdateUserDto(user);
+        try {
+            User user = readById(id);
+            return userDtoConverter.toUpdateUserDto(user);
+        } catch (EntityNotFoundException e) {
+            LOGGER.error("User not found for update with ID: {}", id, e);
+            throw new BusinessException("404", USER_NOT_FOUND);
+        } catch (DatabaseConnectionException e) {
+            LOGGER.error("Database connection error while finding user for update with ID: {}", id, e);
+            throw new BusinessException("500", DATABASE_CONNECTION_ERROR);
+        } catch (Exception e) {
+            LOGGER.error("Unexpected error while finding user for update with ID: {}", id, e);
+            throw new BusinessException("400", UNEXPECTED_ERROR);
+        }
     }
 }
