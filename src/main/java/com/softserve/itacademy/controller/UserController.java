@@ -21,39 +21,40 @@ public class UserController {
 
     private final UserService userService;
 
-    @GetMapping("/create")
-    public String create(/*add needed parameters*/) {
-        //TODO
-    }
-
     @PostMapping("/create")
     public String create(/*add needed parameters*/) {
         //TODO
+        return "test";
     }
 
     @GetMapping("/{id}/read")
     public String read(/*add needed parameters*/) {
         //TODO
+        return "test";
     }
 
-    @GetMapping("/{id}/update")
-    public String update(/*add needed parameters*/) {
+    @GetMapping("/{id}")
+    public String getbyId(/*add needed parameters*/) {
         //TODO
+        return "test";
     }
 
     @PostMapping("/{id}/update")
     public String update(/*add needed parameters*/) {
         //TODO
+        return "test";
     }
 
 
     @GetMapping("/{id}/delete")
     public String delete(/*add needed parameters*/) {
         // TODO
+        return "test";
     }
 
     @GetMapping("/all")
     public String getAll(/*add needed parameters*/) {
         // TODO
+        return "test";
     }
 }

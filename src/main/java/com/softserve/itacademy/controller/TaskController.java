@@ -27,23 +27,27 @@ public class TaskController {
     private final TaskTransformer taskTransformer;
 
     @GetMapping("/create/todos/{todo_id}")
-    public String create(/*add needed parameters*/) {
+    public String getById(/*add needed parameters*/) {
         // TODO
+        return "test";
     }
 
     @PostMapping("/create/todos/{todo_id}")
     public String create(/*add needed parameters*/) {
        // TODO
+        return "test";
     }
 
     @GetMapping("/{task_id}/update/todos/{todo_id}")
     public String taskUpdateForm(/*add needed parameters*/) {
         // TODO
+        return "test";
     }
 
     @PostMapping("/{task_id}/update/todos/{todo_id}")
     public String update(/*add needed parameters*/) {
         // TODO
+        return "test";
     }
 
 }
