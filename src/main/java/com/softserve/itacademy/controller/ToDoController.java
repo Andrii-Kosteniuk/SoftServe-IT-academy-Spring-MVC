@@ -4,6 +4,7 @@ import com.softserve.itacademy.dto.todoDto.ToDoDto;
 import com.softserve.itacademy.service.ToDoService;
 import com.softserve.itacademy.model.User;
 import com.softserve.itacademy.service.UserService;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -12,6 +13,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 
 @Controller
@@ -24,6 +26,8 @@ public class ToDoController {
 
     @GetMapping("/create/users/{owner_id}")
     public String createToDoForm(@PathVariable String owner_id, Model model) {
+        userService.findById(Long.parseLong(owner_id)).orElseThrow(() -> new NoSuchElementException("Owner wasn't found by id: %s".formatted(owner_id)));
+
         model.addAllAttributes(Map.of("owner_id", owner_id, "todo", new ToDoDto()));
         return "create-todo";
     }
