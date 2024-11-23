@@ -73,8 +73,7 @@ public class UserController {
             model.addAttribute("user", updateUserDto);
             return "update-user";
         } catch (BusinessException e) {
-            String status = handleBusinessException(e, model);
-            return status.equals("conflict") ? "update-user" : status;
+            return handleBusinessException(e, model);
         }
     }
 
@@ -96,7 +95,8 @@ public class UserController {
 
             return "redirect:/home";
         } catch (BusinessException e) {
-            return handleBusinessException(e, model);
+            String status = handleBusinessException(e, model);
+            return status.equals("conflict") ? "update-user" : status;
         }
     }
 
@@ -126,6 +126,7 @@ public class UserController {
 
     private String handleBusinessException(BusinessException e, Model model) {
         model.addAttribute("errorMessage", e.getMessage());
+        model.addAttribute("code", e.getCode());
         return switch (e.getCode()) {
             case "404" -> "not-found";
             case "500" -> "error";
