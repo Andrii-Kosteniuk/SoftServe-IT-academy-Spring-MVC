@@ -45,3 +45,8 @@ INSERT INTO todo_collaborator (todo_id, collaborator_id) VALUES (12, 5);
 INSERT INTO todo_collaborator (todo_id, collaborator_id) VALUES (12, 4);
 
 -- SET IDENTITY_INSERT todo_collaborator OFF
+
+-- ALTER SEQUENCE user_sequence RESTART WITH 20;
+-- ALTER SEQUENCE todo_sequence RESTART WITH 20;
+ALTER SEQUENCE task_sequence RESTART WITH 20;
+-- ALTER SEQUENCE state_sequence RESTART WITH 20;

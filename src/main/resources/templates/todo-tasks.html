@@ -13,12 +13,18 @@
 <body>
 <div layout:fragment="content" class="container">
     <div class="container">
-        <h3 class="mb-3 text-start" th:inline="text">All tasks from, <span th:text="${todo.title}">todo </span></h3>
+
+        <h3 class="mb-3 text-start" th:inline="text" style="color: #2980b9">All tasks from, <span
+                th:text="${todo.title}">todo </span></h3>
 
         <a th:href="@{/tasks/create/todos/{todo_id}(todo_id=${todo.id})}"
-           class="btn btn-outline-success mb-3 text-start">Create
-            new task</a>
+           class="btn btn-outline-success mb-3 text-start">Create new task</a>
 
+        <div th:if="${successCreateTaskMessage}">
+            <div class="alert alert-info text-center">
+                <span th:text="${successCreateTaskMessage}"></span>
+            </div>
+        </div>
         <div th:if="${successDeleteTaskMessage}">
             <div class="alert alert-info text-center">
                 <span th:text="${successDeleteTaskMessage}"></span>
@@ -35,9 +41,7 @@
                 <th class="text-center" colspan="2">Operations</th>
             </tr>
             </thead>
-
             <tbody>
-
             <tr th:each="task, iStat: ${tasks}">
                 <td th:text="${iStat.index + 1}"></td>
                 <td class="text-center" th:text="${task.id}"></td>
@@ -67,11 +71,6 @@
                 <span th:text="${successDeleteCollaboratorMessage}"></span>
             </div>
         </div>
-        <div th:if="${successCreateTaskMessage}">
-            <div class="alert alert-info text-center">
-                <span th:text="${successCreateTaskMessage}"></span>
-            </div>
-        </div>
         <div th:if="${successAddCollaboratorMessage}">
             <div class="alert alert-info text-center">
                 <span th:text="${successAddCollaboratorMessage}"></span>
@@ -82,9 +81,9 @@
                 <span th:text="${errorCollaboratorMessage}"></span>
             </div>
         </div>
-        <h5>Collaborators</h5>
-        <div class="w-50 p-3">
-            <div class="row">
+        <h5 style="color: #2980b9">Collaborators</h5>
+        <div class="row gap-5">
+            <div class="col-6">
                 <table class="table table-responsive table-striped text-center">
                     <thead>
                     <tr>
@@ -96,7 +95,10 @@
                     <tbody>
                     <tr th:each="owner, iStat: ${todoCollaborators}">
                         <td th:text="${iStat.index + 1}"></td>
-                        <td th:text="${owner.firstName} + ' ' + ${owner.lastName}"></td>
+                        <td>
+                            <a th:href="@{/users/{id}/read (id=${owner.id})}"
+                               th:text="${owner.firstName + ' ' + owner.lastName}"></a>
+                        </td>
                         <td>
                             <a th:href="@{/tasks/delete/todos/{todo_id}/collaborator/{collaborator_id}(todo_id=${todo.id},collaborator_id=${owner.id})}"
                                class="btn btn-sm btn-danger">Remove</a>
@@ -104,10 +106,9 @@
                     </tr>
                     </tbody>
                 </table>
-                <br>
             </div>
-            <h6>Add new collaborator</h6>
-            <div class="col-sm-8">
+            <div class="col-auto"><br>
+                <h5 style="color: #2980b9">Add new collaborator</h5>
                 <div class="input-group">
                     <div class="col-auto">
                         <label for="collaborator" class="visually-hidden">Add collaborator</label>
@@ -115,15 +116,14 @@
                               th:object="${collaborator}"
                               th:action="@{/tasks/todos/{todo_id}/add/collaborator(todo_id=${todo.id})}">
                             <div class="input-group mb-3 gap-2">
-                                <select name="collaboratorId" id="collaborator" class="form-select">
+                                <select name="collaborator_id" id="collaborator" class="form-select">
+                                    <option value="" disabled selected>Select collaborator...</option>
                                     <option th:each="user : ${allCollaborators}"
                                             th:value="${user.id}"
                                             th:text="${user.firstName + ' ' + user.lastName}">
                                     </option>
                                 </select>
-
-                                    <input type="submit" class="btn btn-sm btn-success" value="Add"/>
-
+                                <input type="submit" class="btn btn-sm btn-success" value="Add"/>
                             </div>
                         </form>
                     </div>
@@ -131,7 +131,8 @@
             </div>
         </div>
         <div>
-            <a th:href="@{|/tasks/todos|}" href="/tasks/todos">Go to ToDo Lists</a>
+            <a th:href="@{/todos/all/users/{user_id}(user_id=${todo.owner.id})}" style="color: crimson">Go to ToDo
+                Lists</a>
         </div>
     </div>
 </div>

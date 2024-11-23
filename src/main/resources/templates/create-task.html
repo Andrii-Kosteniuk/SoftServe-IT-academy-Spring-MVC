@@ -13,14 +13,10 @@
     <h2 class="text-center">Create New Task</h2>
     <div class="container justify-content-center ">
 
-        <div th:if="${errorCreateTaskMessage}">
-            <div class="alert alert-danger text-center">
-                <span th:text="${errorCreateTaskMessage}"></span>
-            </div>
-        </div>
         <form th:action="@{/tasks/create/todos/{todo_id}(todo_id=${todo.id})}" th:object="${task}" method="post">
 
-            <input type="hidden" name="todoId" th:value="${todo.id}">
+            <input type="hidden" name="task_id" th:value="${task.id}">
+            <input type="hidden" name="todo_id" th:value="${todo.id}">
 
             <div class="mb-3">
                 <label for="name" class="form-label">Name</label>

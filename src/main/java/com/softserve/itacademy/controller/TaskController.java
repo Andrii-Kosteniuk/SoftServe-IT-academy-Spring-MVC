@@ -59,15 +59,13 @@ public class TaskController {
             model.addAttribute("priorities", priorities);
             return "create-task";
         }
-//        if (taskService.getAll().contains(task)) {
-//            redirectAttributes.addFlashAttribute("successCreateTaskMessage",
-//                    "Task " + task.getName() + " was created");
-//        } else {
-//            redirectAttributes.addFlashAttribute("errorCreateTaskMessage",
-//                    "Task + " + task.getName() + " already exists");
-//        }
+
         taskService.create(taskTransformer.convertToDto(task));
-        return "redirect:/tasks/todos/" + todo_id;
+
+        redirectAttributes.addFlashAttribute("successCreateTaskMessage",
+                "Task " + task.getName() + " was created");
+
+        return "redirect:/tasks/todos/%s?success=true".formatted(todo_id);
     }
 
     @GetMapping("/{task_id}/update/todos/{todo_id}")
@@ -120,7 +118,7 @@ public class TaskController {
         redirectAttributes.addFlashAttribute("successDeleteTaskMessage", "Task " + name + " was successfully deleted!");
         redirectAttributes.addFlashAttribute("name", name);
 
-        return "redirect:/tasks/todos/" + todo_id;
+        return "redirect:/tasks/todos/%s".formatted(todo_id);
     }
 
     @GetMapping("/delete/todos/{todo_id}/collaborator/{collaborator_id}")
@@ -142,13 +140,13 @@ public class TaskController {
 
         model.addAttribute("todo", toDo);
         model.addAttribute("collaborators", collaborators);
-        return "redirect:/tasks/todos/" + todo_id;
+        return "redirect:/tasks/todos/%s".formatted(todo_id);
     }
 
     @PostMapping("/todos/{todo_id}/add/collaborator")
     public String addCollaborator(
             @PathVariable("todo_id") long todo_id,
-            @RequestParam("collaboratorId") long collaborator_id,
+            @RequestParam("collaborator_id") long collaborator_id,
             RedirectAttributes redirectAttributes) {
 
         ToDo toDo = todoService.readById(todo_id);
@@ -161,17 +159,19 @@ public class TaskController {
             collaborators.add(user);
             todoService.update(toDo);
             redirectAttributes.addFlashAttribute("successAddCollaboratorMessage",
-                    "Collaborator " + name + " was added to current to-do list");
+                    "Collaborator %s was added to current to-do list".formatted(name));
         } else {
             redirectAttributes.addFlashAttribute("errorCollaboratorMessage",
-                    "Collaborator already present in to-do list");
+                    "Collaborator %s already present in to-do list".formatted(name));
         }
 
-        return "redirect:/tasks/todos/" + todo_id;
+        return "redirect:/tasks/todos/%s".formatted(todo_id);
     }
 
     @GetMapping("/todos/{todo_id}")
-    public String taskListPage(@PathVariable("todo_id") long todo_id, Model model) {
+    public String taskListPage(@PathVariable("todo_id") long todo_id,
+                               Model model) {
+
         ToDo toDo = todoService.readById(todo_id);
         List<Task> tasks = taskService.getByTodoId(todo_id);
         List<User> todoCollaborators = toDo.getCollaborators();
