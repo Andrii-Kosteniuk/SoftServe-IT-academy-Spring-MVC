@@ -8,6 +8,13 @@
     <title>Not Found</title>
 </head>
 <body>
-
+    <div layout:fragment="content">
+        <br>
+        <h1 style="margin: 0 auto; width: max-content" th:text="${code}" />
+        <p style="margin: 0 auto; width: max-content" th:text="${errorMessage}"/>
+        <div class="d-flex justify-content-center">
+            <a href="/" class="btn btn-primary">Return Home</a>
+        </div>
+    </div>
 </body>
 </html>
