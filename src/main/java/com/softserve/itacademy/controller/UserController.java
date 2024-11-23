@@ -104,7 +104,8 @@ public class UserController {
     }
 
     @PostMapping("/{id}/update")
-    public String update(@ModelAttribute("user") @Valid UpdateUserDto updateUserDto, BindingResult bindingResult, Model model) {
+    public String update(@PathVariable("id") long id, @ModelAttribute("user") @Valid UpdateUserDto updateUserDto,
+                         BindingResult bindingResult, Model model, HttpSession session) {
         if (bindingResult.hasErrors()) {
             LOGGER.warn("Validation failed for user update. Errors: {}", bindingResult.getAllErrors());
             return "update-user";
@@ -112,6 +113,12 @@ public class UserController {
 
         try {
             userService.update(updateUserDto);
+
+            Long currentUserId = (Long) session.getAttribute("user_id");
+            if (currentUserId != null && currentUserId.equals(id)) {
+                session.setAttribute("username", updateUserDto.getFirstName());
+            }
+
             return "redirect:/home";
         } catch (EmailAlreadyExistsException e) {
             model.addAttribute("errorMessage", e.getMessage());
