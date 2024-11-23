@@ -1,10 +1,12 @@
 package com.softserve.itacademy.controller;
 
 import com.softserve.itacademy.config.exception.EmailAlreadyExistsException;
+import com.softserve.itacademy.config.exception.NullEntityReferenceException;
 import com.softserve.itacademy.dto.userDto.CreateUserDto;
 import com.softserve.itacademy.dto.userDto.UpdateUserDto;
 import com.softserve.itacademy.dto.userDto.UserDto;
 import com.softserve.itacademy.service.UserService;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -31,18 +33,33 @@ public class UserController {
     }
 
     @PostMapping("/create")
-    public String create(@ModelAttribute("user") @Valid CreateUserDto createUserDto, BindingResult bindingResult, Model model) {
+    public String create(@ModelAttribute("user") @Valid CreateUserDto createUserDto, BindingResult bindingResult, Model model,
+                         HttpSession session) {
         if (bindingResult.hasErrors()) {
             LOGGER.warn("Validation failed for user creation. Errors: {}", bindingResult.getAllErrors());
             return "create-user";
         }
 
         try {
-            userService.create(createUserDto);
+            UserDto userDto = userService.create(createUserDto);
+
+            session.setAttribute("username", userDto.getFirstName());
+            session.setAttribute("user_id", userDto.getId());
+            LOGGER.info("User logged in after successful registration: {}", userDto.getEmail());
+
             return "redirect:/todos-user";
         } catch (EmailAlreadyExistsException e) {
+            LOGGER.warn("Failed to create user: {}", e.getMessage());
             model.addAttribute("errorMessage", e.getMessage());
             return "create-user";
+        } catch (NullEntityReferenceException e) {
+            LOGGER.error("Null entity reference error: {}", e.getMessage());
+            model.addAttribute("errorMessage", "Internal error occurred. Please try again later.");
+            return "bad-request";
+        } catch (Exception e) {
+            LOGGER.error("Unexpected error during user creation: {}", e.getMessage());
+            model.addAttribute("errorMessage", "An unexpected error occurred. Please try again later.");
+            return "bad-request";
         }
     }
 
