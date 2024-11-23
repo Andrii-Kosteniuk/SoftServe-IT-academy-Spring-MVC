@@ -15,7 +15,9 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -38,30 +40,37 @@ public class ToDoService {
         throw new NullEntityReferenceException("Title cannot be 'null'");
     }
 
-    public ToDo readById(long id) {
-        return todoRepository.findById(id).orElseThrow(
+    public ToDoDto readById(long id) {
+        ToDo toDo = todoRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("ToDo with id " + id + " not found"));
+
+        return toDoDtoConverter.toDto(toDo);
     }
 
-    public ToDo update(ToDo todo) {
-        if (todo != null) {
-            readById(todo.getId());
-            return todoRepository.save(todo);
+    public ToDo update(ToDoDto toDoDto) {
+        if (toDoDto != null) {
+            ToDoDto existingToDoDto = readById(toDoDto.getId());
+            return todoRepository.save(toDoDtoConverter.fromDto(existingToDoDto));
         }
         throw new NullEntityReferenceException("ToDo cannot be 'null'");
     }
 
     public void delete(long id) {
-        ToDo todo = readById(id);
-        todoRepository.delete(todo);
+        ToDoDto toDoDto = readById(id);
+        todoRepository.delete(toDoDtoConverter.fromDto(toDoDto));
     }
 
     public List<ToDo> getAll() {
         return todoRepository.findAll();
     }
 
-    public List<ToDo> getByUserId(long userId) {
-        return todoRepository.getByUserId(userId);
+    public List<ToDoDto> getByUserId(long userId) {
+        ToDoDtoConverter toDoDtoConverter = new ToDoDtoConverter();
+        return Optional.ofNullable(todoRepository.getByUserId(userId))
+                .orElse(Collections.emptyList())
+                .stream()
+                .map(toDoDtoConverter::toDto)
+                .toList();
     }
 
     public void changeDataFormat(List<ToDo> toDos) {

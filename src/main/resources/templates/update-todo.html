@@ -22,9 +22,7 @@
         <div class="mb-3">
             <label for="title" class="form-label">Title</label>
             <input type="text" class="form-control" th:field="*{title}" id="title">
-            <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('title')}">
-                <span th:errors="*{title}"></span>
-            </div>
+            <span class="text-danger" th:errors="*{title}"></span>
         </div>
 
         <div class="mb-3 d-flex gap-2">
