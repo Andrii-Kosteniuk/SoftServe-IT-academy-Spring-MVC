@@ -1,5 +1,6 @@
 package com.softserve.itacademy.controller;
 
+import com.softserve.itacademy.config.exception.DatabaseConnectionException;
 import com.softserve.itacademy.config.exception.EmailAlreadyExistsException;
 import com.softserve.itacademy.config.exception.NullEntityReferenceException;
 import com.softserve.itacademy.dto.userDto.CreateUserDto;
@@ -58,6 +59,10 @@ public class UserController {
             model.addAttribute("code", "500");
             model.addAttribute("message", "Internal error occurred. Please try again later.");
             return "error";
+        } catch (DatabaseConnectionException e) {
+            LOGGER.error("Database connection error: {}", e.getMessage(), e);
+            model.addAttribute("errorMessage", "Unable to connect to the database. Please try again later.");
+            return "bad-request";
         } catch (Exception e) {
             LOGGER.error("Unexpected error during user creation: {}", e.getMessage());
             model.addAttribute("errorMessage", "An unexpected error occurred. Please try again later.");

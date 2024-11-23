@@ -1,5 +1,6 @@
 package com.softserve.itacademy.service;
 
+import com.softserve.itacademy.config.exception.DatabaseConnectionException;
 import com.softserve.itacademy.config.exception.EmailAlreadyExistsException;
 import com.softserve.itacademy.config.exception.NullEntityReferenceException;
 import com.softserve.itacademy.dto.userDto.CreateUserDto;
@@ -13,6 +14,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -33,19 +35,25 @@ public class UserService {
         }
 
         LOGGER.info("Starting user creation process for email: {}", newUser.getEmail());
-        userRepository.findByEmail(newUser.getEmail()).ifPresent(existingUser -> {
-            LOGGER.warn("User with email {} already exists. Aborting creation.", newUser.getEmail());
-            throw new EmailAlreadyExistsException("User with email " + newUser.getEmail() + " already exists");
-        });
 
-        LOGGER.debug("No existing user found with email: {}. Proceeding with creation.", newUser.getEmail());
-        User user = new User();
-        userDtoConverter.fillFields(user, newUser);
-        user.setPassword("{noop}" + user.getPassword());
+        try {
+            userRepository.findByEmail(newUser.getEmail()).ifPresent(existingUser -> {
+                LOGGER.warn("User with email {} already exists. Aborting creation.", newUser.getEmail());
+                throw new EmailAlreadyExistsException("User with email " + newUser.getEmail() + " already exists");
+            });
 
-        User savedUser = userRepository.save(user);
-        LOGGER.info("User successfully created with ID: {} and email: {}", savedUser.getId(), savedUser.getEmail());
-        return userDtoConverter.toDto(savedUser);
+            LOGGER.debug("No existing user found with email: {}. Proceeding with creation.", newUser.getEmail());
+            User user = new User();
+            userDtoConverter.fillFields(user, newUser);
+            user.setPassword("{noop}" + user.getPassword());
+
+            User savedUser = userRepository.save(user);
+            LOGGER.info("User successfully created with ID: {} and email: {}", savedUser.getId(), savedUser.getEmail());
+            return userDtoConverter.toDto(savedUser);
+        } catch (DataAccessException e) {
+            LOGGER.error("Database error while creating user with email {}: {}", newUser.getEmail(), e.getMessage(), e);
+            throw new DatabaseConnectionException("Failed to connect to the database during user creation", e);
+        }
     }
 
     public User readById(long id) {
