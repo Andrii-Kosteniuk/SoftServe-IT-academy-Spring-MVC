@@ -1,10 +1,8 @@
 package com.softserve.itacademy.controller;
 
 import com.softserve.itacademy.dto.todoDto.ToDoDto;
-import com.softserve.itacademy.model.ToDo;
 import com.softserve.itacademy.service.ToDoService;
 import com.softserve.itacademy.model.User;
-import com.softserve.itacademy.service.TaskService;
 import com.softserve.itacademy.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +10,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 
 @Controller
@@ -24,14 +24,13 @@ public class ToDoController {
 
     @GetMapping("/create/users/{owner_id}")
     public String createToDoForm(@PathVariable String owner_id, Model model) {
-        model.addAttribute("owner_id", owner_id);
-        model.addAttribute("todo", new ToDoDto());
+        model.addAllAttributes(Map.of("owner_id", owner_id, "todo", new ToDoDto()));
         return "create-todo";
     }
 
     @PostMapping("/create/users/{owner_id}")
     public String createToDo(
-            @PathVariable("owner_id") String owner_id,
+            @PathVariable String owner_id,
             @Valid @ModelAttribute("todo") ToDoDto toDoDto,
             BindingResult bindingResult,
             Model model) {
@@ -47,10 +46,14 @@ public class ToDoController {
 
 
     @GetMapping("/{todo_id}/update/users/{owner_id}")
-    public String getToDoById(@PathVariable String todo_id, @PathVariable String owner_id, Model model) {
+    public String getToDoById(
+            @PathVariable String todo_id,
+            @PathVariable String owner_id,
+            Model model
+    ) {
         ToDoDto toDoDto = todoService.readById(Long.parseLong(todo_id));
 
-        model.addAttribute("todo", toDoDto);
+        model.addAllAttributes(Map.of("owner_id", owner_id, "todo", toDoDto));
         return "update-todo";
     }
 
@@ -58,7 +61,7 @@ public class ToDoController {
     public String update(
             @PathVariable String todo_id,
             @PathVariable String owner_id,
-            @Valid @ModelAttribute("todo") ToDo toDo,
+            @Valid @ModelAttribute("todo") ToDoDto toDoDto,
             BindingResult bindingResult,
             Model model
     ) {
@@ -66,12 +69,12 @@ public class ToDoController {
         ToDoDto existingToDoDto = todoService.readById(Long.parseLong(todo_id));
 
         if (bindingResult.hasErrors()) {
-            toDo.setId(existingToDoDto.getId());
-            model.addAttribute("todo", toDo);
+            toDoDto.setId(existingToDoDto.getId());
+            model.addAttribute("todo", toDoDto);
             return "update-todo";
         }
 
-        existingToDoDto.setTitle(toDo.getTitle());
+        existingToDoDto.setTitle(toDoDto.getTitle());
         todoService.update(existingToDoDto);
 
         return "redirect:/todos/all/users/%s".formatted(owner_id);
@@ -92,16 +95,4 @@ public class ToDoController {
 
         return "todo-lists";
     }
-
-//    @GetMapping("/{id}/add")
-//    public String addCollaborator(/*add needed parameters*/) {
-//        //TODO
-//        return "test";
-//    }
-//
-//    @GetMapping("/{id}/remove")
-//    public String removeCollaborator(/*add needed parameters*/) {
-//        //TODO
-//        return "test";
-//    }
 }

@@ -16,7 +16,6 @@
         <div class="mb-3">
             <label for="title" class="form-label">Title</label>
             <input type="text" class="form-control" id="title" th:field="*{title}">
-            <!-- Відображення помилок для поля title -->
             <div th:if="${#fields.hasErrors('title')}" class="text-danger">
                 <p th:each="err : ${#fields.errors('title')}" th:text="${err}"></p>
             </div>
