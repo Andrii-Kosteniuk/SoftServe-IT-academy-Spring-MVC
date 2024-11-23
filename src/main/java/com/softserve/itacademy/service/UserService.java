@@ -33,7 +33,6 @@ public class UserService {
         }
 
         LOGGER.info("Starting user creation process for email: {}", newUser.getEmail());
-
         userRepository.findByEmail(newUser.getEmail()).ifPresent(existingUser -> {
             LOGGER.warn("User with email {} already exists. Aborting creation.", newUser.getEmail());
             throw new EmailAlreadyExistsException("User with email " + newUser.getEmail() + " already exists");
@@ -42,6 +41,7 @@ public class UserService {
         LOGGER.debug("No existing user found with email: {}. Proceeding with creation.", newUser.getEmail());
         User user = new User();
         userDtoConverter.fillFields(user, newUser);
+        user.setPassword("{noop}" + user.getPassword());
 
         User savedUser = userRepository.save(user);
         LOGGER.info("User successfully created with ID: {} and email: {}", savedUser.getId(), savedUser.getEmail());
