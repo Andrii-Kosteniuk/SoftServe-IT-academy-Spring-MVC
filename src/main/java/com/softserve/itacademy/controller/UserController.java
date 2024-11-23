@@ -82,9 +82,13 @@ public class UserController {
             model.addAttribute("code", "404");
             model.addAttribute("errorMessage", "User not found. Please check the ID and try again.");
             return "not-found";
+        } catch (DatabaseConnectionException e) {
+            LOGGER.error("Database connection error while fetching user with ID {}: {}", id, e.getMessage());
+            model.addAttribute("errorMessage", "Unable to connect to the database. Please try again later.");
+            return "bad-request";
         } catch (Exception e) {
             LOGGER.error("Unexpected error during user read: {}", e.getMessage());
-            model.addAttribute("message", "An unexpected error occurred. Please try again later.");
+            model.addAttribute("errorMessage", "An unexpected error occurred. Please try again later.");
             return "bad-request";
         }
     }

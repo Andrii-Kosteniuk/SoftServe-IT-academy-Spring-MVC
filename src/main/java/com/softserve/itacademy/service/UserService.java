@@ -57,8 +57,16 @@ public class UserService {
     }
 
     public User readById(long id) {
-        return userRepository.findById(id).orElseThrow(
-                () -> new EntityNotFoundException("User with id " + id + " not found"));
+        try {
+            LOGGER.info("Attempting to find user with ID: {}", id);
+            return userRepository.findById(id).orElseThrow(() -> {
+                LOGGER.error("User with ID {} not found", id);
+                return new EntityNotFoundException("User with ID " + id + " not found");
+            });
+        } catch (DataAccessException e) {
+            LOGGER.error("Database access error occurred while finding user with ID: {}", id, e);
+            throw new DatabaseConnectionException("Database access error occurred", e);
+        }
     }
 
     public UserDto update(UpdateUserDto updateUserDto) {
