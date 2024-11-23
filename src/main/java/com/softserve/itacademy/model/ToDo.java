@@ -37,6 +37,12 @@ public class ToDo {
             inverseJoinColumns = @JoinColumn(name = "collaborator_id"))
     private List<User> collaborators;
 
+    public ToDo(String title, LocalDateTime createdAt, User owner) {
+        this.title = title;
+        this.createdAt = createdAt;
+        this.owner = owner;
+    }
+
     public ToDo() {
     }
 
