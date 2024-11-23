@@ -116,6 +116,15 @@ public class UserController {
         } catch (EmailAlreadyExistsException e) {
             model.addAttribute("errorMessage", e.getMessage());
             return "update-user";
+        } catch (NullEntityReferenceException e) {
+            LOGGER.error("Null entity reference error: {}", e.getMessage());
+            model.addAttribute("code", "500");
+            model.addAttribute("message", "Internal error occurred. Please try again later.");
+            return "error";
+        } catch (Exception e) {
+            LOGGER.error("Unexpected error during user creation: {}", e.getMessage());
+            model.addAttribute("errorMessage", "An unexpected error occurred. Please try again later.");
+            return "bad-request";
         }
     }
 
