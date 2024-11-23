@@ -122,7 +122,7 @@ public class UserController {
             model.addAttribute("message", "Internal error occurred. Please try again later.");
             return "error";
         } catch (Exception e) {
-            LOGGER.error("Unexpected error during user creation: {}", e.getMessage());
+            LOGGER.error("Unexpected error during user update: {}", e.getMessage());
             model.addAttribute("errorMessage", "An unexpected error occurred. Please try again later.");
             return "bad-request";
         }
@@ -149,9 +149,15 @@ public class UserController {
 
     @GetMapping("/all")
     public String getAll(Model model) {
-        List<UserDto> users = userService.findAll();
-        model.addAttribute("users", users);
-        LOGGER.info("Retrieved users: {}", users.size());
-        return "users-list";
+        try {
+            List<UserDto> users = userService.findAll();
+            model.addAttribute("users", users);
+            LOGGER.info("Retrieved users: {}", users.size());
+            return "users-list";
+        } catch (Exception e) {
+            LOGGER.error("Unexpected error during user retrieval", e);
+            model.addAttribute("errorMessage", "An unexpected error occurred. Please try again later.");
+            return "bad-request";
+        }
     }
 }
