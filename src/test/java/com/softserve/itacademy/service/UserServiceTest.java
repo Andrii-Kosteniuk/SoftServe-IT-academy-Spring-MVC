@@ -1,10 +1,10 @@
 package com.softserve.itacademy.service;
 
+import com.softserve.itacademy.config.exception.BusinessException;
 import com.softserve.itacademy.dto.userDto.CreateUserDto;
 import com.softserve.itacademy.dto.userDto.UserDto;
 import com.softserve.itacademy.dto.userDto.UserDtoConverter;
 import com.softserve.itacademy.model.User;
-import com.softserve.itacademy.model.UserRole;
 import com.softserve.itacademy.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
@@ -13,8 +13,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataAccessException;
 
-import java.util.ArrayList;
+
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -52,6 +53,59 @@ public class UserServiceTest {
         Mockito.verify(userRepository).save(Mockito.any(User.class));
     }
 
+    @Test
+    void testCreateUserIsNull() {
+        BusinessException exception = assertThrows(BusinessException.class, () -> userService.create(null));
+
+        assertEquals("400", exception.getCode());
+        assertEquals("User cannot be 'null'", exception.getMessage());
+        Mockito.verify(userRepository, Mockito.never()).save(Mockito.any(User.class));
+    }
+
+    @Test
+    void testCreateUserWithExistingEmail() {
+        CreateUserDto createUserDto = createCreateUserDto();
+        Mockito.when(userRepository.findByEmail(createUserDto.getEmail()))
+                .thenReturn(Optional.of(new User()));
+
+        BusinessException exception = assertThrows(BusinessException.class, () -> userService.create(createUserDto));
+
+        assertEquals("409", exception.getCode());
+        assertEquals("User with this email already exists", exception.getMessage());
+        Mockito.verify(userRepository, Mockito.never()).save(Mockito.any(User.class));
+    }
+
+    @Test
+    void testCreateUserWithDatabaseConnectionErrorThrowsException() {
+        CreateUserDto createUserDto = createCreateUserDto();
+
+        Mockito.when(userRepository.findByEmail(createUserDto.getEmail())).thenReturn(Optional.empty());
+        Mockito.doNothing().when(userDtoConverter).fillFields(Mockito.any(User.class), Mockito.eq(createUserDto));
+        Mockito.when(userRepository.save(Mockito.any(User.class)))
+                .thenThrow(new DataAccessException("Database connection error") {});
+
+        BusinessException exception = assertThrows(BusinessException.class, () -> userService.create(createUserDto));
+
+        assertEquals("500", exception.getCode());
+        assertEquals("An internal server error occurred. Please try again later", exception.getMessage());
+        Mockito.verify(userRepository).save(Mockito.any(User.class));
+    }
+
+    @Test
+    void testCreateUserWithUnexpectedErrorThrowsException() {
+        CreateUserDto createUserDto = createCreateUserDto();
+
+        Mockito.when(userRepository.findByEmail(createUserDto.getEmail())).thenReturn(Optional.empty());
+        Mockito.doNothing().when(userDtoConverter).fillFields(Mockito.any(User.class), Mockito.eq(createUserDto));
+        Mockito.when(userRepository.save(Mockito.any(User.class)))
+                .thenThrow(new RuntimeException("Unexpected error"));
+
+        BusinessException exception = assertThrows(BusinessException.class, () -> userService.create(createUserDto));
+
+        assertEquals("400", exception.getCode());
+        assertEquals("An unexpected error occurred. Please try again later", exception.getMessage());
+        Mockito.verify(userRepository).save(Mockito.any(User.class));
+    }
 
     private CreateUserDto createCreateUserDto() {
         CreateUserDto dto = new CreateUserDto();
