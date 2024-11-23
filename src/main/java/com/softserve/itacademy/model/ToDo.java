@@ -30,11 +30,17 @@ public class ToDo {
     @OneToMany(mappedBy = "todo", cascade = CascadeType.REMOVE)
     private List<Task> tasks;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany
     @JoinTable(name = "todo_collaborator",
             joinColumns = @JoinColumn(name = "todo_id"),
             inverseJoinColumns = @JoinColumn(name = "collaborator_id"))
     private List<User> collaborators;
+
+    public ToDo(String title, LocalDateTime createdAt, User owner) {
+        this.title = title;
+        this.createdAt = createdAt;
+        this.owner = owner;
+    }
 
     public ToDo() {
     }
