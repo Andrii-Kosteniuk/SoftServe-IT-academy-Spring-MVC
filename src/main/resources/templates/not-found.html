@@ -8,6 +8,10 @@
     <title>Not Found</title>
 </head>
 <body>
-
+    <div layout:fragment="content">
+        <br>
+        <h1 style="margin: 0 auto; width: max-content" th:text="${code}" />
+        <p style="margin: 0 auto; width: max-content" th:text="${errorMessage}"/>
+    </div>
 </body>
 </html>
