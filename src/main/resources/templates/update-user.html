@@ -16,7 +16,7 @@
                     <form id="user-form" th:action="@{/users/{id}/update(id=${user.id})}" th:object="${user}" method="post" class="needs-validation" novalidate>
                         <fieldset disabled>
                             <div class="mb-3">
-                                <label for="userId" class="form-label">First Name</label>
+                                <label for="userId" class="form-label">ID</label>
                                 <input id="userId" type="text" class="form-control" name="userId" th:placeholder="*{id}">
                             </div>
                         </fieldset>
