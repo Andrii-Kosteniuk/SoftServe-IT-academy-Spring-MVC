@@ -51,7 +51,8 @@ public class UserService {
             User savedUser = userRepository.save(user);
             LOGGER.info("User successfully created with ID: {} and email: {}", savedUser.getId(), savedUser.getEmail());
             return userDtoConverter.toDto(savedUser);
-
+        } catch (BusinessException e) {
+            throw e;
         } catch (DatabaseConnectionException e) {
             LOGGER.error("Database connection error while creating user with email: {}", newUser.getEmail(), e);
             throw new BusinessException("500", DATABASE_CONNECTION_ERROR);
@@ -68,7 +69,9 @@ public class UserService {
                 LOGGER.error("User with ID {} not found", id);
                 return new BusinessException("404", USER_NOT_FOUND);
             });
-        } catch (DatabaseConnectionException e) {
+        } catch (BusinessException e) {
+            throw e;
+        }catch (DatabaseConnectionException e) {
             LOGGER.error("Database connection error while finding user with ID: {}", id, e);
             throw new BusinessException("500", DATABASE_CONNECTION_ERROR);
         } catch (Exception e) {
@@ -109,6 +112,8 @@ public class UserService {
             LOGGER.info("User successfully updated with ID: {} and email: {}", updatedUser.getId(), updatedUser.getEmail());
             return userDtoConverter.toDto(updatedUser);
 
+        } catch (BusinessException e) {
+            throw e;
         } catch (DatabaseConnectionException e) {
             LOGGER.error("Database connection error while updating user with ID: {}", updateUserDto.getId(), e);
             throw new BusinessException("500", DATABASE_CONNECTION_ERROR);
@@ -165,18 +170,7 @@ public class UserService {
     }
 
     public UpdateUserDto findByIdToUpdate(long id) {
-        try {
-            User user = readById(id);
-            return userDtoConverter.toUpdateUserDto(user);
-        } catch (EntityNotFoundException e) {
-            LOGGER.error("User not found for update with ID: {}", id, e);
-            throw new BusinessException("404", USER_NOT_FOUND);
-        } catch (DatabaseConnectionException e) {
-            LOGGER.error("Database connection error while finding user for update with ID: {}", id, e);
-            throw new BusinessException("500", DATABASE_CONNECTION_ERROR);
-        } catch (Exception e) {
-            LOGGER.error("Unexpected error while finding user for update with ID: {}", id, e);
-            throw new BusinessException("400", UNEXPECTED_ERROR);
-        }
+        User user = readById(id);
+        return userDtoConverter.toUpdateUserDto(user);
     }
 }
