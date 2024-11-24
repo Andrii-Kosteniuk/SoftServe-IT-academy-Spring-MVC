@@ -12,9 +12,13 @@
 <body>
 <div layout:fragment="content" class="container">
     <h2 class="mb-4">Update Existing Task</h2>
-    <form th:object="${task}" th:action="@{/tasks/{task_id}/update/todos/{todo_id}(task_id=${task.id}, todo_id=${todo.id})}" method="post">
+    <form th:object="${task}"
+          th:action="@{/tasks/{task_id}/update/todos/{todo_id}(task_id=${task.id}, todo_id=${todo.id})}" method="post">
 
-        <input type="hidden" name="task_id" th:value="${task.id}">
+        <div class="mb-3">
+            <label for="name" class="form-label">Id</label>
+            <input type="text" disabled name="task_id" class="form-control" th:value="${task.id}" id="id">
+        </div>
         <input type="hidden" name="todo_id" th:value="${todo.id}">
 
         <div class="mb-3">

@@ -1,6 +1,7 @@
 package com.softserve.itacademy.controller;
 
 import com.softserve.itacademy.dto.TaskTransformer;
+import com.softserve.itacademy.dto.todoDto.ToDoDtoConverter;
 import com.softserve.itacademy.model.*;
 import com.softserve.itacademy.service.StateService;
 import com.softserve.itacademy.service.TaskService;
@@ -27,12 +28,13 @@ public class TaskController {
     private final StateService stateService;
     private final TaskTransformer taskTransformer;
     private final UserService userService;
+    private final ToDoDtoConverter toDoDtoConverter;
 
 
     @GetMapping("/create/todos/{todo_id}")
     public String create(@PathVariable("todo_id") long todo_id, Model model) {
 
-        ToDo toDo = todoService.readById(todo_id);
+        ToDo toDo = toDoDtoConverter.fromDto(todoService.readById(todo_id));
         TaskPriority[] priorities = TaskPriority.values();
 
         model.addAttribute("task", new Task());
@@ -48,7 +50,7 @@ public class TaskController {
                          RedirectAttributes redirectAttributes,
                          Model model) {
 
-        ToDo toDo = todoService.readById(todo_id);
+        ToDo toDo = toDoDtoConverter.fromDto(todoService.readById(todo_id));
         task.setTodo(toDo);
         task.setState(stateService.getByName("New"));
         TaskPriority[] priorities = TaskPriority.values();
@@ -73,7 +75,7 @@ public class TaskController {
                                  @PathVariable("todo_id") long todo_id,
                                  Model model) {
 
-        ToDo toDo = todoService.readById(todo_id);
+        ToDo toDo = toDoDtoConverter.fromDto(todoService.readById(todo_id));
         List<State> states = stateService.getAll();
         TaskPriority[] priorities = TaskPriority.values();
 
@@ -90,7 +92,7 @@ public class TaskController {
                          @Valid @ModelAttribute("task") Task task,
                          BindingResult bindingResult,
                          Model model) {
-        ToDo toDo = todoService.readById(todo_id);
+        ToDo toDo = toDoDtoConverter.fromDto(todoService.readById(todo_id));
         List<State> states = stateService.getAll();
         TaskPriority[] priorities = TaskPriority.values();
         task.setId(task_id);
@@ -128,10 +130,10 @@ public class TaskController {
             Model model,
             RedirectAttributes redirectAttributes) {
 
-        ToDo toDo = todoService.readById(todo_id);
+        ToDo toDo = toDoDtoConverter.fromDto(todoService.readById(todo_id));
         List<User> collaborators = toDo.getCollaborators();
         collaborators.removeIf(user -> user.getId() == collaborator_id);
-        todoService.update(toDo);
+        todoService.update(toDoDtoConverter.toDto(toDo));
         User collaborator = userService.readById(collaborator_id);
         String name = collaborator.getFirstName() + " " + collaborator.getLastName();
 
@@ -149,7 +151,7 @@ public class TaskController {
             @RequestParam("collaborator_id") long collaborator_id,
             RedirectAttributes redirectAttributes) {
 
-        ToDo toDo = todoService.readById(todo_id);
+        ToDo toDo = toDoDtoConverter.fromDto(todoService.readById(todo_id));
         List<User> collaborators = toDo.getCollaborators();
 
         User user = userService.readById(collaborator_id);
@@ -157,7 +159,7 @@ public class TaskController {
 
         if (! collaborators.contains(user)) {
             collaborators.add(user);
-            todoService.update(toDo);
+            todoService.update(toDoDtoConverter.toDto(toDo));
             redirectAttributes.addFlashAttribute("successAddCollaboratorMessage",
                     "Collaborator %s was added to current to-do list".formatted(name));
         } else {
@@ -172,7 +174,7 @@ public class TaskController {
     public String taskListPage(@PathVariable("todo_id") long todo_id,
                                Model model) {
 
-        ToDo toDo = todoService.readById(todo_id);
+        ToDo toDo = toDoDtoConverter.fromDto(todoService.readById(todo_id));
         List<Task> tasks = taskService.getByTodoId(todo_id);
         List<User> todoCollaborators = toDo.getCollaborators();
         List<User> allCollaborators = userService.getAll();
