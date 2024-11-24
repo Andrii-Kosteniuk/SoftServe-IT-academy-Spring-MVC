@@ -8,6 +8,42 @@
     <title>Info about User</title>
 </head>
 <body>
-
+    <div layout:fragment="content">
+        <div class="container mt-5">
+            <h2 class="text-center">User Information</h2>
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h5 class="card-title">User Details</h5>
+                    <table class="table table-striped">
+                        <tbody>
+                        <tr>
+                            <th scope="row">ID</th>
+                            <td th:text="${user.id}">1</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">First Name</th>
+                            <td th:text="${user.firstName}">John</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Last Name</th>
+                            <td th:text="${user.lastName}">Doe</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Email</th>
+                            <td th:text="${user.email}">john.doe@example.com</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Role</th>
+                            <td th:text="${user.role}">Admin</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <div class="text-center mt-4">
+                        <a href="/home" class="btn btn-secondary">Home</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

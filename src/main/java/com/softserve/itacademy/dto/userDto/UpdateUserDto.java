@@ -4,7 +4,9 @@ import com.softserve.itacademy.model.UserRole;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
+@EqualsAndHashCode()
 @Data
 public class UpdateUserDto {
 
