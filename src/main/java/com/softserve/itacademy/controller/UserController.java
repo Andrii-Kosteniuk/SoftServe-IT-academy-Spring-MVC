@@ -46,7 +46,7 @@ public class UserController {
             session.setAttribute("user_id", userDto.getId());
             LOGGER.info("User logged in after successful registration: {}", userDto.getEmail());
 
-            return "redirect:/todos-user";
+            return "redirect:/todos/all/users/" + userDto.getId();
         } catch (BusinessException e) {
             String status = handleBusinessException(e, model);
             return status.equals("conflict") ? "create-user" : status;

@@ -62,7 +62,7 @@ public class UserControllerTest {
                         .param("password", "password123")
                         .sessionAttr("user", userDto))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/todos-user"));
+                .andExpect(redirectedUrl("/todos/all/users/" + createdUserDto.getId()));
 
         Mockito.verify(userService).create(Mockito.any(CreateUserDto.class));
     }
@@ -162,7 +162,7 @@ public class UserControllerTest {
                         .param("email", dto.getEmail())
                         .param("password", dto.getPassword()))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/todos-user"))
+                .andExpect(redirectedUrl("/todos/all/users/" + userDto.getId()))
                 .andExpect(request().sessionAttribute("username", "John"))
                 .andExpect(request().sessionAttribute("user_id", 1L));
 
