@@ -40,7 +40,6 @@ public class UserServiceTest {
     @Test
     void testCreateUserSuccess() {
         CreateUserDto createUserDto = createCreateUserDto();
-        User user = createUser();
         User savedUser = createSavedUser();
         UserDto userDto = createExpectedUserDto();
 
