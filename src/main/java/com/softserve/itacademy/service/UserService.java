@@ -150,7 +150,21 @@ public class UserService {
     }
 
     public UserDto findByIdThrowing(long id) {
-        return userRepository.findById(id).map(userDtoConverter::toDto).orElseThrow(EntityNotFoundException::new);
+        try {
+            LOGGER.info("Attempting to find user with ID: {}", id);
+            return userRepository.findById(id).map(userDtoConverter::toDto).orElseThrow(() -> {
+                LOGGER.error("User with ID {} not found", id);
+                return new BusinessException("404", USER_NOT_FOUND);
+            });
+        } catch (BusinessException e) {
+            throw e;
+        }catch (DataAccessException e) {
+            LOGGER.error("Database connection error while finding user with ID: {}", id, e);
+            throw new BusinessException("500", DATABASE_CONNECTION_ERROR);
+        } catch (Exception e) {
+            LOGGER.error("Unexpected error while finding user with ID: {}", id, e);
+            throw new BusinessException("400", UNEXPECTED_ERROR);
+        }
     }
 
     public List<UserDto> findAll() {
