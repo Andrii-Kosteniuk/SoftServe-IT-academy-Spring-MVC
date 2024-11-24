@@ -35,7 +35,7 @@
             <td th:text="${iStat.index + 1}"></td>
             <td th:text="${todo.id}"></td>
             <td>
-                <a th:text="${todo.getTitle()}"></a>
+                <a th:href="@{|/tasks/todos/${todo.getId()}|}" th:text="${todo.getTitle()}"></a>
             </td>
             <td th:text="${todo.createdAt}"></td>
             <td th:text="|${todo.owner.getFirstName()} ${todo.owner.getLastName()}|"></td>
