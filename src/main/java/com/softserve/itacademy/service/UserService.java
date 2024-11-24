@@ -126,9 +126,8 @@ public class UserService {
         try {
             User user = readById(id);
             userRepository.delete(user);
-        } catch (EntityNotFoundException e) {
-            LOGGER.error("User not found with ID: {}", id);
-            throw new BusinessException("404", USER_NOT_FOUND);
+        } catch (BusinessException e) {
+            throw e;
         } catch (DataAccessException e) {
             LOGGER.error("Database connection error while deleting user with ID {}: {}", id, e.getMessage());
             throw new BusinessException("500", DATABASE_CONNECTION_ERROR);

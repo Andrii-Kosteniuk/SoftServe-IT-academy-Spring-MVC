@@ -50,6 +50,7 @@ public class ToDoService {
     public ToDo update(ToDoDto toDoDto) {
         if (toDoDto != null) {
             ToDoDto existingToDoDto = readById(toDoDto.getId());
+            existingToDoDto.setTitle(toDoDto.getTitle());
             return todoRepository.save(toDoDtoConverter.fromDto(existingToDoDto));
         }
         throw new NullEntityReferenceException("ToDo cannot be 'null'");
@@ -82,5 +83,7 @@ public class ToDoService {
             toDo.setCreatedAt(LocalDateTime.parse(formattedDate, dateTimeFormatter));
         });
     }
+
+
 
 }
