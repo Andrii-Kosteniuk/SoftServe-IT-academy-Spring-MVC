@@ -1,6 +1,7 @@
 package com.softserve.itacademy.component.home;
 
 import com.softserve.itacademy.controller.ToDoController;
+import com.softserve.itacademy.dto.userDto.UserDto;
 import com.softserve.itacademy.model.User;
 import com.softserve.itacademy.service.ToDoService;
 import com.softserve.itacademy.service.UserService;
@@ -11,6 +12,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
@@ -29,7 +33,7 @@ public class ToDoControllerTest {
     @MockBean
     private UserService userService;
 
-    private static final long USER_ID = 5;
+    private static final long USER_ID = 4;
 
     private static final long INVALID_USER_ID = -1;
 
@@ -40,7 +44,7 @@ public class ToDoControllerTest {
         when(userService.readById(USER_ID)).thenReturn(mockUser);
         Mockito.doNothing().when(todoService).changeDataFormat(anyList());
 
-        mvc.perform(get("/todos/all/users/%s".formatted(USER_ID))
+        mvc.perform(get("/todos/all/users/{owner_id}", USER_ID)
                         .contentType(MediaType.TEXT_HTML))
                 .andExpect(status().isOk())
                 .andExpect(view().name("todo-lists"))
@@ -49,10 +53,31 @@ public class ToDoControllerTest {
 
     @Test
     void createToDoForm_IntegrationTest() throws Exception {
-        mvc.perform(get("/todos/create/users/%s".formatted(USER_ID))
+        Mockito.when(userService.findById(anyLong())).thenReturn(Optional.of(new UserDto()));
+
+        mvc.perform(get("/todos/create/users/{owner_id}", USER_ID)
                         .contentType(MediaType.TEXT_HTML))
                 .andExpect(status().isOk())
                 .andExpect(view().name("create-todo"))
                 .andExpect(model().attributeExists("owner_id", "todo"));
     }
+
+//    @Test
+//    void createToDoForm_ShouldReturn404_WhenOwnerNotFound() throws Exception {
+//        Mockito.when(userService.findById(INVALID_USER_ID)).thenReturn(Optional.of(new UserDto()));
+//
+//        mvc.perform(get("/todos/create/users/{owner_id}", INVALID_USER_ID)
+//                        .contentType(MediaType.TEXT_HTML))
+//                .andExpect(view().name("error-page"));
+////                .andExpect(model().attribute("error", "Owner wasn't found by id: -1"));
+//    }
+//
+//    @Test
+//    void getToDoById_IntegrationTest() throws Exception {
+//        mvc.perform(get("/todos/{todo_id}/update/users/{owner_id}", USER_ID)
+//                .contentType(MediaType.TEXT_HTML))
+//                .andExpect(status().isOk())
+//                .andExpect(view().name("/todos/all/users/%s".formatted(USER_ID)))
+//                .andExpect(model().attributeExists("todo"));
+//    }
 }
