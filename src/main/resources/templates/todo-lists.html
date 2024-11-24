@@ -12,7 +12,7 @@
 <body>
 <div layout:fragment="content" class="container mt-5">
     <div>
-        <h1 th:text="|All To-Dos of ${user.getFirstName()} ${user.getLastName()}|"></h1>
+        <h1>All To-Dos</h1>
 
         <form th:action="@{|/todos/create/users/${user_id}|}" method="get" class="mb-4">
             <button type="submit" class="btn btn-primary">Create To-Do</button>
@@ -31,19 +31,19 @@
         </tr>
         </thead>
         <tbody>
-        <tr th:each="todo, iStat: ${user.getMyTodos()}">
+        <tr th:each="todo, iStat: ${todos}">
             <td th:text="${iStat.index + 1}"></td>
             <td th:text="${todo.id}"></td>
             <td>
-                <a th:href="@{|/tasks/todos/${todo.getId()}|}" th:text="${todo.getTitle()}"></a>
+                <a th:href="@{|/todos/all/users/${todo.getOwner().getId()}|}" th:text="${todo.getTitle()}"></a>
             </td>
             <td th:text="${todo.createdAt}"></td>
             <td th:text="|${todo.owner.getFirstName()} ${todo.owner.getLastName()}|"></td>
-            <td class="text-center align-middle">
-                <a th:href="@{|/todos/${todo.id}/update/users/${user_id}|}">Edit</a>
+            <td th:if="${user_id == todo.getOwner().getId()}" class="text-center align-middle">
+                <a th:href="@{|/todos/${todo.id}/update/users/${todo.getOwner().getId()}|}">Edit</a>
             </td>
-            <td class="text-center">
-                <form th:action="@{|/todos/${todo.id}/remove/users/${user.id}|}" method="POST">
+            <td class="text-center" th:if="${user_id == todo.getOwner().getId()}">
+                <form th:action="@{|/todos/${todo.id}/remove/users/${todo.getOwner().getId()}|}" method="POST">
                     <input type="hidden" name="_method" value="DELETE">
                     <button type="submit" class="btn btn-link">Remove</button>
                 </form>

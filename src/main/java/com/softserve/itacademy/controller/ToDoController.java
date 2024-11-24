@@ -1,6 +1,7 @@
 package com.softserve.itacademy.controller;
 
 import com.softserve.itacademy.dto.todoDto.ToDoDto;
+import com.softserve.itacademy.model.ToDo;
 import com.softserve.itacademy.service.ToDoService;
 import com.softserve.itacademy.model.User;
 import com.softserve.itacademy.service.UserService;
@@ -12,6 +13,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
@@ -91,11 +93,22 @@ public class ToDoController {
     }
 
     @GetMapping("/all/users/{user_id}")
-    public String getAll(@PathVariable String user_id, Model model) {
+    public String getAllTodosByUser(@PathVariable String user_id, Model model) {
 
         User user = userService.readById(Long.parseLong(user_id));
         todoService.changeDataFormat(user.getMyTodos());
         model.addAttribute("user", user);
+
+        return "todos-user";
+    }
+
+    @GetMapping("/all/user/{user_id}")
+    public String getAllTodos(@PathVariable String user_id, Model model) {
+
+        List<ToDo> todos = todoService.getAll();
+        todoService.changeDataFormat(todos);
+        model.addAttribute("todos", todos);
+        model.addAttribute("user_id", Long.parseLong(user_id));
 
         return "todo-lists";
     }
