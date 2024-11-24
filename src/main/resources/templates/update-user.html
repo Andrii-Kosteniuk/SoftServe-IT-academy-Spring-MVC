@@ -8,6 +8,60 @@
     <title>Update existing User</title>
 </head>
 <body>
-
+    <div layout:fragment="content">
+        <div class="container mt-5">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <h2 class="text-center">Update existing User</h2>
+                    <form id="user-form" th:action="@{/users/{id}/update(id=${user.id})}" th:object="${user}" method="post" class="needs-validation" novalidate>
+                        <fieldset disabled>
+                            <div class="mb-3">
+                                <label for="userId" class="form-label">ID</label>
+                                <input id="userId" type="text" class="form-control" name="userId" th:placeholder="*{id}">
+                            </div>
+                        </fieldset>
+                        <div class="mb-3">
+                            <label for="firstName" class="form-label">First Name</label>
+                            <input id="firstName" type="text" class="form-control" name="firstName" th:placeholder="*{firstName}" th:field="*{firstName}">
+                            <div th:if="${#fields.hasErrors('firstName')}" class="text-danger">
+                                <p th:each="error : ${#fields.errors('firstName')}" th:text="${error}"></p>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="lastName" class="form-label">Last Name</label>
+                            <input id="lastName" type="text" class="form-control" name="lastName" th:placeholder="*{lastName}" th:field="*{lastName}">
+                            <div th:if="${#fields.hasErrors('lastName')}" class="text-danger">
+                                <p th:each="error : ${#fields.errors('lastName')}" th:text="${error}"></p>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label id="email" for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" name="email" th:placeholder="*{email}" th:field="*{email}">
+                            <div th:if="${#fields.hasErrors('email')}" class="text-danger">
+                                <p th:each="error : ${#fields.errors('email')}" th:text="${error}"></p>
+                            </div>
+                            <div th:if="${errorMessage != null}" class="text-danger">
+                                <p th:text="${errorMessage}"></p>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label id="role" for="role" class="form-label">Role</label>
+                            <select class="form-control" name="role" th:field="*{role}">
+                                <option value="USER" th:selected="*{role == 'USER'}">User</option>
+                                <option value="ADMIN" th:selected="*{role == 'ADMIN'}">Admin</option>
+                            </select>
+                            <div th:if="${#fields.hasErrors('role')}" class="text-danger">
+                                <p th:each="error : ${#fields.errors('role')}" th:text="${error}"></p>
+                            </div>
+                        </div>
+                        <div>
+                            <button type="submit" class="btn btn-primary">Update</button>
+                            <button type="reset" class="btn btn-secondary" onclick="clearForm()">Clear</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

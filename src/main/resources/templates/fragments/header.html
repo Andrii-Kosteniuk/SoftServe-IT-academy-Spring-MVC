@@ -42,7 +42,7 @@
         <div class="collapse navbar-collapse" id="navbarText">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li th:if="${user_id != null}" class="nav-item">
-                    <a class="nav-link" th:href="@{|/todos/all/users/${user_id}|}">My To-Dos</a>
+                    <a class="nav-link" th:href="@{|/todos/all/user/${user_id}|}">List of To-Dos</a>
                 </li>
                 <li th:if="${user_id != null}" class="nav-item">
                     <a class="nav-link" th:href="@{/users/all}">List of Users</a>

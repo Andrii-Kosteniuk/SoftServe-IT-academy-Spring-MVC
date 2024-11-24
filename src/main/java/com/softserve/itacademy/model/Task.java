@@ -1,6 +1,8 @@
 package com.softserve.itacademy.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,16 +15,18 @@ import java.util.Objects;
 public class Task {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "task_seq")
+    @SequenceGenerator(name = "task_seq", sequenceName = "task_sequence", allocationSize = 1)
     private long id;
 
     @Column(name = "name", nullable = false)
+    @NotBlank(message = "The 'name' cannot be empty")
     private String name;
 
     @Enumerated(EnumType.STRING)
     private TaskPriority priority;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "todo_id")
     private ToDo todo;
 
